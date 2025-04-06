@@ -1,11 +1,11 @@
 #include <string>
 #include <sstream>
-#include "AdjacentGraph.h"
+#include "AdjacentMatrixGraph.h"
 
 namespace graph {
 using namespace std;
 
-    AdjacentGraph::AdjacentGraph(ifstream& input) : SuperGraph(input) {
+    AdjacentMatrixGraph::AdjacentMatrixGraph(ifstream& input) : SuperGraph(input) {
         input >> numNodes;
         adjacencyMatrix = new double[numNodes * numNodes];
         int a, b;
@@ -15,11 +15,11 @@ using namespace std;
         input.close();
     }
 
-    AdjacentGraph::~AdjacentGraph() {
+    AdjacentMatrixGraph::~AdjacentMatrixGraph() {
         delete[] adjacencyMatrix;
     }
 
-    vector<int> AdjacentGraph::getAdjacentNodes(int node) const {
+    vector<int> AdjacentMatrixGraph::getAdjacentNodes(int node) const {
         vector<int> adjacentNodes;
         for (int i = 0; i < numNodes; i++) {
             if (adjacencyMatrix[node * numNodes + i] != 0) {

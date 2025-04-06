@@ -8,7 +8,8 @@
 
 #include "graph/SuperGraph.h"
 #include "graph/EdgeListGraph.h"
-#include "graph/AdjacentGraph.h"
+#include "graph/AdjacentMatrixGraph.h"
+#include "graph/AdjacentListGraph.h"
 
 using namespace std;
 
@@ -19,11 +20,11 @@ int getConnectedComponents(const graph::SuperGraph& graph);
 
 
 int main() {
-    cout << "Press 1 to use an EdgeListGraph, 2 to use an AdjacentMatrixGraph" << endl;
+    cout << "Press 1 to use an EdgeListGraph, 2 to use an AdjacentMatrixGraph, or 3 to use an AdjacentListGraph" << endl;
     int graphModeChoice;
     cin >> graphModeChoice;
-    while (graphModeChoice != 1 && graphModeChoice != 2) {
-        cout << "Invalid choice. Please enter 1 or 2:" << endl;
+    while (graphModeChoice != 1 && graphModeChoice != 2&& graphModeChoice != 3) {
+        cout << "Invalid choice. Please enter 1, 2 or 3:" << endl;
         cin >> graphModeChoice;
     }
 
@@ -51,8 +52,13 @@ int main() {
     std::unique_ptr<graph::SuperGraph> graph;
     if (graphModeChoice == 1) {
         graph = std::make_unique<graph::EdgeListGraph>(inputFile);
-    } else {
+    } else if (graphModeChoice == 2) {
         graph = std::make_unique<graph::AdjacentMatrixGraph>(inputFile);
+    } else if (graphModeChoice == 3) {
+        graph = std::make_unique<graph::AdjacentListGraph>(inputFile);
+    } else {
+        cout << "Invalid graph mode choice." << endl;
+        return 1;
     }
 
     cout << "Done reading the graph, starting to calculate connected components" << endl;
@@ -75,18 +81,18 @@ int getConnectedComponents(const graph::SuperGraph& graph) {
 
     int connectedComponents = 0;
 
-    vector<bool> visited(graph.numNodes, false);
+    vector visited(graph.numNodes, false);
     vector<int> subGraph {};
 
     for (int node = 0; node < graph.numNodes; node++) {
         if (visited[node]) continue;
-        depthFirstSearch(graph, node, subGraph, visited);
         connectedComponents++;
+        depthFirstSearch(graph, node, subGraph, visited);
     }
     return connectedComponents;
 }
 
-void depthFirstSearch(const graph::SuperGraph& graph, int startNode, vector<int>& subGraph, vector<bool>& visited) {
+void depthFirstSearch(const graph::SuperGraph& graph, const int startNode, vector<int>& subGraph, vector<bool>& visited) {
     subGraph.push_back(startNode);
     visited[startNode] = true;
 

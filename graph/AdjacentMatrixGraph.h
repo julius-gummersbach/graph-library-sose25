@@ -2,8 +2,8 @@
 // Created by Julius Gummersbach on 04.04.25.
 //
 
-#ifndef ADJACENTGRAPH_H
-#define ADJACENTGRAPH_H
+#ifndef ADJACENTMATRIXGRAPH_H
+#define ADJACENTMATRIXGRAPH_H
 
 #include "SuperGraph.h"
 
@@ -19,4 +19,4 @@ namespace graph {
 }
 
 
-#endif //ADJACENTGRAPH_H
+#endif //ADJACENTMATRIXGRAPH_H
