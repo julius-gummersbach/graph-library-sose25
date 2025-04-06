@@ -5,12 +5,15 @@
 #ifndef EDGELISTGRAPH_H
 #define EDGELISTGRAPH_H
 
+#include "SuperGraph.h"
+
 namespace graph {
-
-
-class EdgeListGraph {
-
-};
+  class EdgeListGraph : public SuperGraph {
+    public:
+      explicit EdgeListGraph(std::ifstream& input);
+      ~EdgeListGraph() override;
+      [[nodiscard]] std::vector<int> getAdjacentNodes(int node) const override;
+  };
 }
 
 

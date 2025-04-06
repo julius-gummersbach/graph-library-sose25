@@ -3,3 +3,6 @@
 //
 
 #include "SuperGraph.h"
+namespace graph {
+  SuperGraph::SuperGraph(std::ifstream& file) {}
+}

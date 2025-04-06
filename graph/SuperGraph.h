@@ -1,18 +1,17 @@
-//
-// Created by Julius Gummersbach on 04.04.25.
-//
-
 #ifndef SuperGraph_H
 #define SuperGraph_H
 #include <vector>
+#include <fstream>
 
 namespace graph {
   class SuperGraph {
   public:
-    SuperGraph();
-    const int numNodes;
+    explicit SuperGraph(std::ifstream& input);
+    virtual ~SuperGraph() = default;
 
-    std::vector<int> getAdjacentNodes(int node) const;
+    int numNodes;
+
+    [[nodiscard]] virtual std::vector<int> getAdjacentNodes(int node) const = 0;
   };
 }
 

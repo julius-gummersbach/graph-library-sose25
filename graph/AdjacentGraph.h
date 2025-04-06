@@ -8,8 +8,13 @@
 #include "SuperGraph.h"
 
 namespace graph {
-  class AdjacentGraph : SuperGraph {
-
+  class AdjacentMatrixGraph : public SuperGraph {
+  public:
+    explicit AdjacentMatrixGraph(std::ifstream& input);
+    ~AdjacentMatrixGraph() override;
+    [[nodiscard]] std::vector<int> getAdjacentNodes(int node) const override;
+  private:
+    double* adjacencyMatrix;
   };
 }
 
