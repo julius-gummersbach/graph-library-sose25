@@ -10,8 +10,9 @@ namespace graph {
     virtual ~SuperGraph() = default;
 
     int numNodes;
+    bool directed = false;
 
-    [[nodiscard]] virtual std::vector<int> getAdjacentNodes(int node) const = 0;
+    [[nodiscard]] const virtual std::vector<int>& getAdjacentNodes(int node) = 0;
   };
 }
 

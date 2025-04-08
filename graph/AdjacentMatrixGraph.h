@@ -5,6 +5,8 @@
 #ifndef ADJACENTMATRIXGRAPH_H
 #define ADJACENTMATRIXGRAPH_H
 
+#include <map>
+
 #include "SuperGraph.h"
 
 namespace graph {
@@ -12,9 +14,10 @@ namespace graph {
   public:
     explicit AdjacentMatrixGraph(std::ifstream& input);
     ~AdjacentMatrixGraph() override;
-    [[nodiscard]] std::vector<int> getAdjacentNodes(int node) const override;
+    [[nodiscard]] const std::vector<int>& getAdjacentNodes(int node) override;
   private:
     double* adjacencyMatrix;
+    std::map<int, std::vector<int>> adjacencyCache;
   };
 }
 

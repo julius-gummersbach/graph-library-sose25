@@ -12,7 +12,7 @@ namespace graph {
     public:
       explicit EdgeListGraph(std::ifstream& input);
       ~EdgeListGraph() override;
-      [[nodiscard]] std::vector<int> getAdjacentNodes(int node) const override;
+      [[nodiscard]] const std::vector<int>& getAdjacentNodes(int node) override;
   };
 }
 

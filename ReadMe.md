@@ -1,4 +1,3 @@
-
 ## Beschreibung des Eingabeformats
 
 Ein kleiner, zwei mittlere, und drei große Graphen als Kantenliste.  
