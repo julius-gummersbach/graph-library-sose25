@@ -17,18 +17,19 @@ namespace graph {
     adjacencyList.resize(numNodes);
 
     std::vector<std::pair<int, int>> edges;
-    std::vector outDegree(numNodes, 0);
+    //std::vector outDegree(numNodes, 0);  not worth the overhead yet, might be for bigger graphs
     {
       int a, b;
       while (input >> a >> b) {
         edges.emplace_back(a, b);
-        outDegree[a]++;
-        if (!directed) outDegree[b]++;
+        //outDegree[a]++;
+        //if (!directed) outDegree[b]++;
       }
     }
 
     for (int i = 0; i < numNodes; ++i) {
-      adjacencyList[i].reserve(outDegree[i]);
+      adjacencyList[i].reserve(15);
+      //adjacencyList[i].reserve(outDegree[i]);
     }
 
     if (numNodes > 1000000) {
