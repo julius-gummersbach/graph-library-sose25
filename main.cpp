@@ -85,6 +85,7 @@ int main() {
   std::cout << "Number of connected components: " << connectedComponents << std::endl;
   std::cout << "Time taken to set up the graph: " << setupDuration.count() << " ms" << std::endl;
   std::cout << "Time taken to find connected components: " << calcDuration.count() << " ms" << std::endl;
+  std::cout << "Total time taken: " << (setupDuration + calcDuration).count() << " ms" << std::endl;
 
   return 0;
 }
@@ -103,6 +104,7 @@ int getConnectedComponents(graph::SuperGraph &graph) {
 
 std::vector<int> depthFirstSearch(graph::SuperGraph &graph, const int startNode, vector<bool> &visited) {
   std::vector<int> subGraph;
+  subGraph.reserve(graph.numNodes / 2);
   std::stack<int> stack{};
   stack.push(startNode);
   while (!stack.empty()) {
