@@ -24,7 +24,8 @@ int getConnectedComponents(graph::SuperGraph &graph);
 int main() {
   cout << "Press 1 to use an EdgeListGraph, 2 to use an AdjacentMatrixGraph, or 3 to use an AdjacentListGraph" << endl;
   int graphModeChoice;
-  cin >> graphModeChoice;
+  //cin >> graphModeChoice;
+  graphModeChoice = 3; // todo For testing purposes, we set it to 3
   while (graphModeChoice != 1 && graphModeChoice != 2 && graphModeChoice != 3) {
     cout << "Invalid choice. Please enter 1, 2 or 3:" << endl;
     cin >> graphModeChoice;
@@ -39,7 +40,8 @@ int main() {
     graphPaths.push_back(path.path());
   }
   int inputChoice;
-  cin >> inputChoice;
+  //cin >> inputChoice;
+    inputChoice = 1; // todo
   while (inputChoice < 0 || inputChoice >= size) {
     cout << "Invalid choice. Please enter a number between 0 and " << size - 1 << ":" << endl;
     cin >> inputChoice;
@@ -49,19 +51,23 @@ int main() {
   cout << "Starting to read the graph from " << inputPath << endl;
   auto start = std::chrono::high_resolution_clock::now();
 
-  // Read from the text file
-  ifstream inputFile(inputPath);
-  if (!inputFile) {
-    cerr << "Failed to open input file: " << inputPath << endl;
+  std::ifstream file(inputPath);
+  if (!file) {
+    std::cerr << "Failed to open input file: " << inputPath << std::endl;
     return 1;
   }
+
+  // Read the entire file into memory
+  std::ostringstream buffer;
+  buffer << file.rdbuf();
+  std::istringstream input(buffer.str());
   std::unique_ptr<graph::SuperGraph> graph;
   if (graphModeChoice == 1) {
-    graph = std::make_unique<graph::EdgeListGraph>(inputFile);
+    graph = std::make_unique<graph::EdgeListGraph>(input);
   } else if (graphModeChoice == 2) {
-    graph = std::make_unique<graph::AdjacentMatrixGraph>(inputFile);
+    graph = std::make_unique<graph::AdjacentMatrixGraph>(input);
   } else if (graphModeChoice == 3) {
-    graph = std::make_unique<graph::AdjacentListGraph>(inputFile);
+    graph = std::make_unique<graph::AdjacentListGraph>(input);
   } else {
     cout << "Invalid graph mode choice." << endl;
     return 1;

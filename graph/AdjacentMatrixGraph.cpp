@@ -7,7 +7,7 @@
 namespace graph {
   using namespace std;
 
-  AdjacentMatrixGraph::AdjacentMatrixGraph(ifstream &input) : SuperGraph(input) {
+  AdjacentMatrixGraph::AdjacentMatrixGraph(istream &input) : SuperGraph(input) {
     input >> numNodes;
     adjacencyMatrix = new double[numNodes * numNodes];
     int a, b;
@@ -17,9 +17,10 @@ namespace graph {
         continue;
       }
       if (!directed && b < a) {
-        swap(a, b);
+        adjacencyMatrix[b * numNodes + a] = 1;
+      } else {
+        adjacencyMatrix[a * numNodes + b] = 1;
       }
-      adjacencyMatrix[a * numNodes + b] = 1;
     }
   }
 

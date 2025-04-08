@@ -10,7 +10,7 @@
 namespace graph {
   class EdgeListGraph : public SuperGraph {
     public:
-      explicit EdgeListGraph(std::ifstream& input);
+      explicit EdgeListGraph(std::istream& input);
       ~EdgeListGraph() override;
       [[nodiscard]] const std::vector<int>& getAdjacentNodes(int node) override;
   };

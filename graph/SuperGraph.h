@@ -6,7 +6,7 @@
 namespace graph {
   class SuperGraph {
   public:
-    explicit SuperGraph(std::ifstream& input);
+    explicit SuperGraph(std::istream& input);
     virtual ~SuperGraph() = default;
 
     int numNodes;

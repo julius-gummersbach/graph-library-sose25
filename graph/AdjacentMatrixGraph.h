@@ -12,7 +12,7 @@
 namespace graph {
   class AdjacentMatrixGraph : public SuperGraph {
   public:
-    explicit AdjacentMatrixGraph(std::ifstream& input);
+    explicit AdjacentMatrixGraph(std::istream& input);
     ~AdjacentMatrixGraph() override;
     [[nodiscard]] const std::vector<int>& getAdjacentNodes(int node) override;
   private:

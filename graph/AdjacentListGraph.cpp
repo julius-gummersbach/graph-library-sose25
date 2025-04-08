@@ -4,18 +4,30 @@ namespace graph {
 
   using namespace std;
 
-  AdjacentListGraph::AdjacentListGraph(ifstream& input) : SuperGraph(input) {
+  AdjacentListGraph::AdjacentListGraph(istream& input) : SuperGraph(input) {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+
     input >> numNodes;
     adjacencyList.resize(numNodes);
+
+    std::vector<std::pair<int, int>> edges;
+    std::vector<int> outDegree(numNodes, 0);
     int a, b;
     while (input >> a >> b) {
-      if (a < 0 || a >= numNodes || b < 0 || b >= numNodes) {
-        cerr << "Invalid edge in input: " << a << " -> " << b << endl;
-        continue;
-      }
-      adjacencyList[a].push_back(b);
+      edges.emplace_back(a, b);
+      outDegree[a]++;
+      if (!directed) outDegree[b]++;
+    }
+
+    for (int i = 0; i < numNodes; ++i) {
+      adjacencyList[i].reserve(outDegree[i]);
+    }
+
+    for (const auto& [from, to] : edges) {
+      adjacencyList[from].emplace_back(to);
       if (!directed) {
-        adjacencyList[b].push_back(a);
+        adjacencyList[to].emplace_back(from);
       }
     }
   }
