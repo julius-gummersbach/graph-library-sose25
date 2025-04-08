@@ -48,10 +48,8 @@ namespace graph {
       });
     } else {
       for (const auto&[first, second] : edges) {
-        const int a = first;
-        const int b = second;
-        adjacencyList[a].push_back(b);
-        if (!directed) adjacencyList[b].push_back(a);
+        adjacencyList[first].push_back(second);
+        if (!directed) adjacencyList[second].push_back(first);
       }
     }
   }

@@ -14,46 +14,50 @@
 
 using namespace std;
 
-const string INPUT_PATH = "../input/";
+constexpr bool INTERACTIVE = true;
+int graphModeChoice = 2;
+string inputFile = "../input/Graph_ganzganzgross.txt";
+
+const string INPUT_DIR = "../input/";
 
 std::vector<int> depthFirstSearch(graph::SuperGraph &graph, int startNode, vector<bool> &visited);
-
 int getConnectedComponents(graph::SuperGraph &graph);
 
 
 int main() {
-  cout << "Press 1 to use an EdgeListGraph, 2 to use an AdjacentMatrixGraph, or 3 to use an AdjacentListGraph" << endl;
-  int graphModeChoice;
-  //cin >> graphModeChoice;
-  graphModeChoice = 3; // todo For testing purposes, we set it to 3
-  while (graphModeChoice != 1 && graphModeChoice != 2 && graphModeChoice != 3) {
-    cout << "Invalid choice. Please enter 1, 2 or 3:" << endl;
+  if (INTERACTIVE) {
+    cout << "Press 0 to use an EdgeListGraph, 1 to use an AdjacentMatrixGraph, or 2 to use an AdjacentListGraph" <<
+        endl;
     cin >> graphModeChoice;
-  }
 
-  cout << "Select one of the available graphs:" << endl;
-  auto availInputs = filesystem::directory_iterator(INPUT_PATH);
-  std::vector<std::filesystem::path> graphPaths;
-  int size = 0;
-  for (const auto &path: availInputs) {
-    cout << size++ << ": " << path.path() << endl;
-    graphPaths.push_back(path.path());
-  }
-  int inputChoice;
-  //cin >> inputChoice;
-    inputChoice = 1; // todo
-  while (inputChoice < 0 || inputChoice >= size) {
-    cout << "Invalid choice. Please enter a number between 0 and " << size - 1 << ":" << endl;
+    while (graphModeChoice != 0 && graphModeChoice != 1 && graphModeChoice != 2) {
+      cout << "Invalid choice. Please enter 1, 2 or 3:" << endl;
+      cin >> graphModeChoice;
+    }
+
+    cout << "Select one of the available graphs:" << endl;
+    auto availInputs = filesystem::directory_iterator(INPUT_DIR);
+    std::vector<std::filesystem::path> graphPaths;
+    int size = 0;
+    for (const auto &path: availInputs) {
+      cout << size++ << ": " << path.path() << endl;
+      graphPaths.push_back(path.path());
+    }
+    int inputChoice;
     cin >> inputChoice;
+    while (inputChoice < 0 || inputChoice >= size) {
+      cout << "Invalid choice. Please enter a number between 0 and " << size - 1 << ":" << endl;
+      cin >> inputChoice;
+    }
+    inputFile = graphPaths[inputChoice].string();
   }
-  string inputPath = graphPaths[inputChoice].string();
 
-  cout << "Starting to read the graph from " << inputPath << endl;
+  cout << "Starting to read the graph from " << inputFile << endl;
   auto start = std::chrono::high_resolution_clock::now();
 
-  std::ifstream file(inputPath);
+  std::ifstream file(inputFile);
   if (!file) {
-    std::cerr << "Failed to open input file: " << inputPath << std::endl;
+    std::cerr << "Failed to open input file: " << inputFile << std::endl;
     return 1;
   }
 
@@ -62,15 +66,19 @@ int main() {
   buffer << file.rdbuf();
   std::istringstream input(buffer.str());
   std::unique_ptr<graph::SuperGraph> graph;
-  if (graphModeChoice == 1) {
-    graph = std::make_unique<graph::EdgeListGraph>(input);
-  } else if (graphModeChoice == 2) {
-    graph = std::make_unique<graph::AdjacentMatrixGraph>(input);
-  } else if (graphModeChoice == 3) {
-    graph = std::make_unique<graph::AdjacentListGraph>(input);
-  } else {
-    cout << "Invalid graph mode choice." << endl;
-    return 1;
+  switch (graphModeChoice) {
+    case 0:
+      graph = std::make_unique<graph::EdgeListGraph>(input);
+      break;
+    case 1:
+      graph = std::make_unique<graph::AdjacentMatrixGraph>(input);
+      break;
+    case 2:
+      graph = std::make_unique<graph::AdjacentListGraph>(input);
+      break;
+    default:
+      cout << "Invalid graph mode choice." << endl;
+      return 1;
   }
 
   cout << "Done reading the graph, starting to calculate connected components" << endl;
