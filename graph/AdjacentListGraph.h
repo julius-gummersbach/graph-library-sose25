@@ -10,11 +10,11 @@
 namespace graph {
   class AdjacentListGraph : public SuperGraph {
     public:
-      explicit AdjacentListGraph(std::istream& input);
-      ~AdjacentListGraph() override;
+      void initializeFromInput(std::istream& input) override;
       [[nodiscard]] const std::vector<int>& getAdjacentNodes(int node) override;
     private:
       std::vector<std::vector<int>> adjacencyList;
+
   };
 }
 

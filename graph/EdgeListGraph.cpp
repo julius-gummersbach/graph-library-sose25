@@ -1,8 +1,15 @@
 #include "EdgeListGraph.h"
 
 namespace graph {
-  EdgeListGraph::EdgeListGraph(std::istream& input) : SuperGraph(input) {}
-  EdgeListGraph::~EdgeListGraph() = default;
+  void EdgeListGraph::initializeFromInput(std::istream& input) {
+    input >> numNodes;
+
+    int a, b;
+    while (input >> a >> b) {
+      // todo
+    }
+    initialized = true;
+  }
 
   const std::vector<int>& EdgeListGraph::getAdjacentNodes(int node) {
     return {};

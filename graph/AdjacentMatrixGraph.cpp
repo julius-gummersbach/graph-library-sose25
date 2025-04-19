@@ -7,7 +7,7 @@
 namespace graph {
   using namespace std;
 
-  AdjacentMatrixGraph::AdjacentMatrixGraph(istream &input) : SuperGraph(input) {
+  void AdjacentMatrixGraph::initializeFromInput(istream &input) {
     input >> numNodes;
     adjacencyMatrix = new double[numNodes * numNodes];
     int a, b;
@@ -22,13 +22,13 @@ namespace graph {
         adjacencyMatrix[a * numNodes + b] = 1;
       }
     }
-  }
-
-  AdjacentMatrixGraph::~AdjacentMatrixGraph() {
-    delete[] adjacencyMatrix;
+    initialized = true;
   }
 
   const vector<int>& AdjacentMatrixGraph::getAdjacentNodes(int node) {
+    if (!initialized) {
+      throw runtime_error("Graph not initialized.");
+    }
     if (adjacencyCache.contains(node)) {
       return adjacencyCache.at(node);
     }

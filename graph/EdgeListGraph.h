@@ -10,9 +10,10 @@
 namespace graph {
   class EdgeListGraph : public SuperGraph {
     public:
-      explicit EdgeListGraph(std::istream& input);
-      ~EdgeListGraph() override;
+      void initializeFromInput(std::istream& input) override;
       [[nodiscard]] const std::vector<int>& getAdjacentNodes(int node) override;
+    private:
+      std::vector<std::vector<int>> adjacencyList;
   };
 }
 

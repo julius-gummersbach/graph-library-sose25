@@ -6,6 +6,7 @@
 #include <memory>
 #include <chrono>
 #include <stack>
+#include <cassert>
 
 #include "graph/SuperGraph.h"
 #include "graph/EdgeListGraph.h"
@@ -14,88 +15,52 @@
 
 using namespace std;
 
-constexpr bool INTERACTIVE = true;
-int graphModeChoice = 2;
-string inputFile = "../input/Graph_ganzganzgross.txt";
 
 const string INPUT_DIR = "../input/";
 
 std::vector<int> depthFirstSearch(graph::SuperGraph &graph, int startNode, vector<bool> &visited);
+void assertFunctionOnGraph(const std::string& inputFile, graph::SuperGraph* graph, int function(graph::SuperGraph&), int expectedResult);
 int getConnectedComponents(graph::SuperGraph &graph);
 
 
 int main() {
-  if (INTERACTIVE) {
-    cout << "Press 0 to use an EdgeListGraph, 1 to use an AdjacentMatrixGraph, or 2 to use an AdjacentListGraph" <<
-        endl;
-    cin >> graphModeChoice;
+  assertFunctionOnGraph(INPUT_DIR + "0x01/Graph1.txt", new graph::AdjacentMatrixGraph(), getConnectedComponents, 2);
+  assertFunctionOnGraph(INPUT_DIR + "0x01/Graph2.txt", new graph::AdjacentMatrixGraph(), getConnectedComponents, 4);
+  assertFunctionOnGraph(INPUT_DIR + "0x01/Graph3.txt", new graph::AdjacentMatrixGraph(), getConnectedComponents, 4);
+  assertFunctionOnGraph(INPUT_DIR + "0x01/Graph4.txt", new graph::AdjacentListGraph(), getConnectedComponents, 222);
+  assertFunctionOnGraph(INPUT_DIR + "0x01/Graph5.txt", new graph::AdjacentListGraph(), getConnectedComponents, 9560);
+  assertFunctionOnGraph(INPUT_DIR + "0x01/Graph6.txt", new graph::AdjacentListGraph(), getConnectedComponents, 306);
 
-    while (graphModeChoice != 0 && graphModeChoice != 1 && graphModeChoice != 2) {
-      cout << "Invalid choice. Please enter 1, 2 or 3:" << endl;
-      cin >> graphModeChoice;
-    }
+  return 0;
+}
 
-    cout << "Select one of the available graphs:" << endl;
-    auto availInputs = filesystem::directory_iterator(INPUT_DIR);
-    std::vector<std::filesystem::path> graphPaths;
-    int size = 0;
-    for (const auto &path: availInputs) {
-      cout << size++ << ": " << path.path() << endl;
-      graphPaths.push_back(path.path());
-    }
-    int inputChoice;
-    cin >> inputChoice;
-    while (inputChoice < 0 || inputChoice >= size) {
-      cout << "Invalid choice. Please enter a number between 0 and " << size - 1 << ":" << endl;
-      cin >> inputChoice;
-    }
-    inputFile = graphPaths[inputChoice].string();
-  }
-
-  cout << "Starting to read the graph from " << inputFile << endl;
+void assertFunctionOnGraph(const std::string& inputFile, graph::SuperGraph* graph, int function(graph::SuperGraph&), int expectedResult) {
   auto start = std::chrono::high_resolution_clock::now();
-
   std::ifstream file(inputFile);
   if (!file) {
     std::cerr << "Failed to open input file: " << inputFile << std::endl;
-    return 1;
+    return;
   }
-
   // Read the entire file into memory
   std::ostringstream buffer;
   buffer << file.rdbuf();
   std::istringstream input(buffer.str());
-  std::unique_ptr<graph::SuperGraph> graph;
-  switch (graphModeChoice) {
-    case 0:
-      graph = std::make_unique<graph::EdgeListGraph>(input);
-      break;
-    case 1:
-      graph = std::make_unique<graph::AdjacentMatrixGraph>(input);
-      break;
-    case 2:
-      graph = std::make_unique<graph::AdjacentListGraph>(input);
-      break;
-    default:
-      cout << "Invalid graph mode choice." << endl;
-      return 1;
-  }
-
-  cout << "Done reading the graph, starting to calculate connected components" << endl;
+  graph->initializeFromInput(input);
+  
+  cout << "Done reading the graph, starting to calculating task..." << endl;
   auto setupComplete = std::chrono::high_resolution_clock::now();
 
-  const int connectedComponents = getConnectedComponents(*graph);
-
+  const int result = (*function)(*graph);
   auto end = std::chrono::high_resolution_clock::now();
   auto setupDuration = std::chrono::duration_cast<std::chrono::milliseconds>(setupComplete - start);
   auto calcDuration = std::chrono::duration_cast<std::chrono::milliseconds>(end - setupComplete);
 
-  std::cout << "Number of connected components: " << connectedComponents << std::endl;
   std::cout << "Time taken to set up the graph: " << setupDuration.count() << " ms" << std::endl;
-  std::cout << "Time taken to find connected components: " << calcDuration.count() << " ms" << std::endl;
+  std::cout << "Time taken to calculate task: " << calcDuration.count() << " ms" << std::endl;
   std::cout << "Total time taken: " << (setupDuration + calcDuration).count() << " ms" << std::endl;
 
-  return 0;
+  assert(("Test failed: Result does not match expected value", result == expectedResult));
+  delete graph;
 }
 
 int getConnectedComponents(graph::SuperGraph &graph) {
@@ -120,8 +85,7 @@ std::vector<int> depthFirstSearch(graph::SuperGraph &graph, const int startNode,
     stack.pop();
     subGraph.push_back(currentNode);
     visited[currentNode] = true;
-    const vector<int> &adjacent = graph.getAdjacentNodes(currentNode);
-    for (int node: adjacent) {
+    for (const vector<int> &adjacent = graph.getAdjacentNodes(currentNode); int node: adjacent) {
       if (visited[node]) continue;
       stack.push(node);
     }

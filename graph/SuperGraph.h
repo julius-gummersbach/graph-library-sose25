@@ -6,12 +6,14 @@
 namespace graph {
   class SuperGraph {
   public:
-    explicit SuperGraph(std::istream& input);
-    virtual ~SuperGraph() = default;
+    explicit SuperGraph() = default;
+    virtual ~SuperGraph();
 
-    int numNodes;
+    int numNodes = 0;
     bool directed = false;
+    bool initialized = false;
 
+    virtual void initializeFromInput(std::istream& input) = 0;
     [[nodiscard]] const virtual std::vector<int>& getAdjacentNodes(int node) = 0;
   };
 }

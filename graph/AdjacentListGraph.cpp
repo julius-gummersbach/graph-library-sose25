@@ -9,7 +9,7 @@ namespace graph {
 
   using namespace std;
 
-  AdjacentListGraph::AdjacentListGraph(istream& input) : SuperGraph(input) {
+  void AdjacentListGraph::initializeFromInput(istream& input) {
     std::ios::sync_with_stdio(false);
     std::cin.tie(nullptr);
 
@@ -52,11 +52,13 @@ namespace graph {
         if (!directed) adjacencyList[second].push_back(first);
       }
     }
+    initialized = true;
   }
 
-  AdjacentListGraph::~AdjacentListGraph() = default;
-
   const vector<int>& AdjacentListGraph::getAdjacentNodes(int node) {
+    if (!initialized) {
+      throw runtime_error("Graph not initialized.");
+    }
     return adjacencyList[node];
   }
 }

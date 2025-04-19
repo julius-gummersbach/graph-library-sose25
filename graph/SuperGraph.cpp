@@ -3,6 +3,7 @@
 //
 
 #include "SuperGraph.h"
+
 namespace graph {
-  SuperGraph::SuperGraph(std::istream& file) {}
+  SuperGraph::~SuperGraph() = default;  // define it!
 }
