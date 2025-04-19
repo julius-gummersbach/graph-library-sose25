@@ -1,1 +1,4 @@
-*gross.txt filter=lfs diff=lfs merge=lfs -text
+./input/0x01/Graph4.txt filter=lfs diff=lfs merge=lfs -text
+./input/0x01/Graph4.txt filter=lfs diff=lfs merge=lfs -text
+./input/0x01/Graph4.txt filter=lfs diff=lfs merge=lfs -text
+./input/0x02/*.txt filter=lfs diff=lfs merge=lfs -text
