@@ -61,4 +61,12 @@ namespace graph {
     }
     return adjacencyList[node];
   }
+
+  std::vector<std::array<int, 2>> AdjacentListGraph::getEdgesSortedByWeight() {
+    throw runtime_error("Not implemented yet.");
+  }
+
+  double AdjacentListGraph::getWeight(std::array<int, 2> edge) {
+    throw runtime_error("Not implemented yet.");
+  }
 }

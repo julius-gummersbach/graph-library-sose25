@@ -15,6 +15,9 @@ namespace graph {
 
     virtual void initializeFromInput(std::istream& input) = 0;
     [[nodiscard]] const virtual std::vector<int>& getAdjacentNodes(int node) = 0;
+
+    virtual std::vector<std::array<int, 2>> getEdgesSortedByWeight() = 0;
+    virtual double getWeight(std::array<int, 2> edge) = 0;
   };
 }
 

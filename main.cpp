@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include <filesystem>
+#include <set>
 #include <string>
 #include <vector>
 #include <memory>
@@ -19,8 +19,10 @@ using namespace std;
 const string INPUT_DIR = "../input/";
 
 std::vector<int> depthFirstSearch(graph::SuperGraph &graph, int startNode, vector<bool> &visited);
-void assertFunctionOnGraph(const std::string& inputFile, graph::SuperGraph* graph, int function(graph::SuperGraph&), int expectedResult);
-int getConnectedComponents(graph::SuperGraph &graph);
+void assertFunctionOnGraph(const std::string& inputFile, graph::SuperGraph* graph, double function(graph::SuperGraph&), double expectedResult);
+double getConnectedComponents(graph::SuperGraph &graph);
+double getMSTWeight(graph::SuperGraph &graph);
+std::vector<graph::EdgeListGraph::edge_t> getMSTPrim(graph::SuperGraph &graph);
 
 
 int main() {
@@ -31,10 +33,17 @@ int main() {
   assertFunctionOnGraph(INPUT_DIR + "0x01/Graph5.txt", new graph::AdjacentListGraph(), getConnectedComponents, 9560);
   assertFunctionOnGraph(INPUT_DIR + "0x01/Graph6.txt", new graph::AdjacentListGraph(), getConnectedComponents, 306);
 
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::EdgeListGraph(), getMSTWeight, 287.32286);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_20.txt", new graph::EdgeListGraph(), getMSTWeight, 36.86275);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_200.txt", new graph::EdgeListGraph(), getMSTWeight, 12.68182);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_10_20.txt", new graph::EdgeListGraph(), getMSTWeight, 2785.62417);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_10_200.txt", new graph::EdgeListGraph(), getMSTWeight, 372.14417);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_100_200.txt", new graph::EdgeListGraph(), getMSTWeight, 27550.51488);
+
   return 0;
 }
 
-void assertFunctionOnGraph(const std::string& inputFile, graph::SuperGraph* graph, int function(graph::SuperGraph&), int expectedResult) {
+void assertFunctionOnGraph(const std::string& inputFile, graph::SuperGraph* graph, double function(graph::SuperGraph&), double expectedResult) {
   auto start = std::chrono::high_resolution_clock::now();
   std::ifstream file(inputFile);
   if (!file) {
@@ -50,7 +59,7 @@ void assertFunctionOnGraph(const std::string& inputFile, graph::SuperGraph* grap
   cout << "Done reading the graph, starting to calculating task..." << endl;
   auto setupComplete = std::chrono::high_resolution_clock::now();
 
-  const int result = (*function)(*graph);
+  const double result = (*function)(*graph);
   auto end = std::chrono::high_resolution_clock::now();
   auto setupDuration = std::chrono::duration_cast<std::chrono::milliseconds>(setupComplete - start);
   auto calcDuration = std::chrono::duration_cast<std::chrono::milliseconds>(end - setupComplete);
@@ -59,12 +68,12 @@ void assertFunctionOnGraph(const std::string& inputFile, graph::SuperGraph* grap
   std::cout << "Time taken to calculate task: " << calcDuration.count() << " ms" << std::endl;
   std::cout << "Total time taken: " << (setupDuration + calcDuration).count() << " ms" << std::endl;
 
-  assert(("Test failed: Result does not match expected value", result == expectedResult));
+  assert(("Test failed: Result does not match expected value", result - expectedResult < 0.000001));
   delete graph;
 }
 
-int getConnectedComponents(graph::SuperGraph &graph) {
-  int connectedComponents = 0;
+double getConnectedComponents(graph::SuperGraph &graph) {
+  double connectedComponents = 0;
   vector visited(graph.numNodes, false);
 
   for (int node = 0; node < graph.numNodes; node++) {
@@ -73,6 +82,33 @@ int getConnectedComponents(graph::SuperGraph &graph) {
     depthFirstSearch(graph, node, visited);
   }
   return connectedComponents;
+}
+
+double getMSTWeight(graph::SuperGraph &graph) {
+  const auto mst = getMSTPrim(graph);
+  double weight = 0;
+  for (const auto edge: mst) {
+    weight += graph.getWeight(edge);
+  }
+  return weight;
+}
+
+std::vector<graph::EdgeListGraph::edge_t> getMSTPrim(graph::SuperGraph &graph) {
+  const auto sortedEdges = graph.getEdgesSortedByWeight();
+  std::vector<graph::EdgeListGraph::edge_t> mst;
+  std::vector found(graph.numNodes, false);
+  found[0] = true;
+  while (mst.size() < graph.numNodes - 1) {
+    for (auto edge: sortedEdges) {
+      if (found[edge[0]] != found[edge[1]]) {
+        found[edge[0]] = true;
+        found[edge[1]] = true;
+        mst.push_back(edge);
+        break;
+      }
+    }
+  }
+  return mst;
 }
 
 std::vector<int> depthFirstSearch(graph::SuperGraph &graph, const int startNode, vector<bool> &visited) {

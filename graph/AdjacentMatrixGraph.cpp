@@ -51,4 +51,12 @@ namespace graph {
     adjacencyCache[node] = adjacentNodes;
     return adjacencyCache[node];
   }
+
+  std::vector<std::array<int, 2>> AdjacentMatrixGraph::getEdgesSortedByWeight() {
+    throw runtime_error("Not implemented yet.");
+  }
+
+  double AdjacentMatrixGraph::getWeight(std::array<int, 2> edge) {
+    throw runtime_error("Not implemented yet.");
+  }
 }
