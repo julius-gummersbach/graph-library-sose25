@@ -53,7 +53,7 @@ namespace graph {
     return adjacencyList[node];
   }
 
-  std::vector<std::array<int, 2> > AdjacentListGraph::getEdges() {
+  std::vector<SuperGraph::edge_t> AdjacentListGraph::getEdges() {
     if (!initialized) {
       throw std::runtime_error("Graph not initialized.");
     }
@@ -68,16 +68,16 @@ namespace graph {
     return edges;*/
   }
 
-  double AdjacentListGraph::getWeight(std::array<int, 2> edge) {
+  double AdjacentListGraph::getWeight(const int u, const int v) {
     if (!initialized) {
       throw runtime_error("Graph not initialized.");
     }
     if (!weighted) {
       throw runtime_error("Graph is not weighted.");
     }
-    for (int i = 0; i < adjacencyList[edge[0]].size(); i++) {
-      if (adjacencyList[edge[0]][i] == edge[1]) {
-        return weights[edge[0]][i];
+    for (int i = 0; i < adjacencyList[u].size(); i++) {
+      if (adjacencyList[u][i] == v) {
+        return weights[u][i];
       }
     }
     throw runtime_error("Edge not found.");

@@ -10,9 +10,8 @@ namespace graph {
     int a, b;
     double weight;
     while (input >> a >> b >> weight) {
-      auto edge = std::array{a, b};
+      auto edge = std::tuple{a, b, weight};
       edgeList.push_back(edge);
-      weights[edge] = weight;
     }
     initialized = true;
   }
@@ -24,14 +23,11 @@ namespace graph {
     return edgeList;
   }
 
-  double EdgeListGraph::getWeight(const edge_t edge) {
-    if (!initialized) {
-      throw std::runtime_error("Graph not initialized.");
-    }
-    return weights[edge];
+  double EdgeListGraph::getWeight(int u, int v) {
+    throw std::runtime_error("Not implemented yet.");
   }
 
   const std::vector<int>& EdgeListGraph::getAdjacentNodes(int node) {
-    return {};
+    throw std::runtime_error("Not implemented yet.");
   }
 }

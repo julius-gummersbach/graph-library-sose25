@@ -8,7 +8,7 @@ namespace graph {
   public:
     explicit SuperGraph() = default;
     virtual ~SuperGraph();
-    typedef std::array<int, 2> edge_t;
+    typedef std::tuple<int, int, double> edge_t;
 
     int numNodes = 0;
     bool directed = false;
@@ -19,7 +19,7 @@ namespace graph {
     [[nodiscard]] const virtual std::vector<int>& getAdjacentNodes(int node) = 0;
 
     virtual std::vector<edge_t> getEdges() = 0;
-    virtual double getWeight(edge_t edge) = 0;
+    virtual double getWeight(int u, int v) = 0;
   };
 }
 

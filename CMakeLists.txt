@@ -12,4 +12,6 @@ add_executable(graph-library-gummersbach
         graph/AdjacentListGraph.cpp
         graph/EdgeListGraph.cpp
         graph/SuperGraph.cpp
+        helper/UnionFind.cpp
+        helper/UnionFind.h
 )

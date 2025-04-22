@@ -1,7 +1,3 @@
-//
-// Created by Julius Gummersbach on 04.04.25.
-//
-
 #ifndef ADJACENTMATRIXGRAPH_H
 #define ADJACENTMATRIXGRAPH_H
 
@@ -14,8 +10,8 @@ namespace graph {
   public:
     void initializeFromInput(std::istream& input) override;
     [[nodiscard]] const std::vector<int>& getAdjacentNodes(int node) override;
-    std::vector<std::array<int, 2>> getEdges() override;
-    double getWeight(std::array<int, 2> edge) override;
+    std::vector<edge_t> getEdges() override;
+    double getWeight(int u, int v) override;
   private:
     double* adjacencyMatrix;
     std::map<int, std::vector<int>> adjacencyCache;
