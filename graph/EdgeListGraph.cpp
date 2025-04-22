@@ -17,15 +17,11 @@ namespace graph {
     initialized = true;
   }
 
-  std::vector<EdgeListGraph::edge_t> EdgeListGraph::getEdgesSortedByWeight() {
+  std::vector<EdgeListGraph::edge_t> EdgeListGraph::getEdges() {
     if (!initialized) {
       throw std::runtime_error("Graph not initialized.");
     }
-    std::vector<edge_t> sortedEdges = edgeList;
-    std::ranges::sort(sortedEdges, [this](const auto &e1, const auto &e2) {
-      return this->getWeight(e1) < this->getWeight(e2);
-    });
-    return sortedEdges;
+    return edgeList;
   }
 
   double EdgeListGraph::getWeight(const edge_t edge) {

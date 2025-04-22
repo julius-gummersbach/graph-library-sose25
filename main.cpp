@@ -33,12 +33,12 @@ int main() {
   assertFunctionOnGraph(INPUT_DIR + "0x01/Graph5.txt", new graph::AdjacentListGraph(), getConnectedComponents, 9560);
   assertFunctionOnGraph(INPUT_DIR + "0x01/Graph6.txt", new graph::AdjacentListGraph(), getConnectedComponents, 306);
 
-  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::EdgeListGraph(), getMSTWeight, 287.32286);
-  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_20.txt", new graph::EdgeListGraph(), getMSTWeight, 36.86275);
-  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_200.txt", new graph::EdgeListGraph(), getMSTWeight, 12.68182);
-  assertFunctionOnGraph(INPUT_DIR + "0x02/G_10_20.txt", new graph::EdgeListGraph(), getMSTWeight, 2785.62417);
-  assertFunctionOnGraph(INPUT_DIR + "0x02/G_10_200.txt", new graph::EdgeListGraph(), getMSTWeight, 372.14417);
-  assertFunctionOnGraph(INPUT_DIR + "0x02/G_100_200.txt", new graph::EdgeListGraph(), getMSTWeight, 27550.51488);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::AdjacentListGraph(), getMSTWeight, 287.32286);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_20.txt", new graph::AdjacentListGraph(), getMSTWeight, 36.86275);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_200.txt", new graph::AdjacentListGraph(), getMSTWeight, 12.68182);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_10_20.txt", new graph::AdjacentListGraph(), getMSTWeight, 2785.62417);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_10_200.txt", new graph::AdjacentListGraph(), getMSTWeight, 372.14417);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_100_200.txt", new graph::AdjacentListGraph(), getMSTWeight, 27550.51488);
 
   return 0;
 }
@@ -56,7 +56,7 @@ void assertFunctionOnGraph(const std::string& inputFile, graph::SuperGraph* grap
   std::istringstream input(buffer.str());
   graph->initializeFromInput(input);
   
-  cout << "Done reading the graph, starting to calculating task..." << endl;
+  cout << "Done reading the graph, starting calculation task..." << endl;
   auto setupComplete = std::chrono::high_resolution_clock::now();
 
   const double result = (*function)(*graph);
@@ -93,18 +93,33 @@ double getMSTWeight(graph::SuperGraph &graph) {
   return weight;
 }
 
-std::vector<graph::EdgeListGraph::edge_t> getMSTPrim(graph::SuperGraph &graph) {
-  const auto sortedEdges = graph.getEdgesSortedByWeight();
-  std::vector<graph::EdgeListGraph::edge_t> mst;
+std::vector<graph::SuperGraph::edge_t> getMSTPrim(graph::SuperGraph &graph) {
+  using edge_t = graph::SuperGraph::edge_t;
+
+  auto weightFunc = [&](const edge_t &e) {
+    return graph.getWeight(e);  // if 'graph' is passed in and has getWeight
+  };
+
+  auto cmp = [&](const edge_t &a, const edge_t &b) {
+    return weightFunc(a) < weightFunc(b);
+  };
+  std::priority_queue<edge_t, std::vector<edge_t>, decltype(cmp)> pq(cmp);
+  for (const auto node: graph.getAdjacentNodes(0)) {
+    pq.push(std::array{0, node});
+  }
+
+  std::vector<graph::SuperGraph::edge_t> mst;
   std::vector found(graph.numNodes, false);
   found[0] = true;
   while (mst.size() < graph.numNodes - 1) {
-    for (auto edge: sortedEdges) {
-      if (found[edge[0]] != found[edge[1]]) {
-        found[edge[0]] = true;
-        found[edge[1]] = true;
-        mst.push_back(edge);
-        break;
+    auto edge = pq.top();
+    pq.pop();
+    if (!found[edge[1]]) {
+      found[edge[1]] = true;
+      mst.push_back(edge);
+      for (const auto node: graph.getAdjacentNodes(edge[1])) {
+        if (found[node]) continue;
+        pq.push(std::array{edge[1], node});
       }
     }
   }

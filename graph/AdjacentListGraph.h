@@ -12,10 +12,11 @@ namespace graph {
     public:
       void initializeFromInput(std::istream& input) override;
       [[nodiscard]] const std::vector<int>& getAdjacentNodes(int node) override;
-      std::vector<std::array<int, 2>> getEdgesSortedByWeight() override;
+      std::vector<std::array<int, 2>> getEdges() override;
       double getWeight(std::array<int, 2> edge) override;
     private:
       std::vector<std::vector<int>> adjacencyList;
+      std::vector<std::vector<double>> weights;
 
   };
 }
