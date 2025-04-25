@@ -6,12 +6,13 @@
 using namespace std;
 using edge_t = graph::SuperGraph::edge_t;
 
-auto edgeComparator = [](const edge_t& lhs, const edge_t& rhs)
-{
-  return get<2>(lhs) > get<2>(rhs);
-};
 
 vector<edge_t> getMSTPrim(graph::SuperGraph &graph) {
+  auto edgeComparator = [](const edge_t& lhs, const edge_t& rhs)
+  {
+    return get<2>(lhs) > get<2>(rhs);
+  };
+
   priority_queue<edge_t, vector<edge_t>, decltype(edgeComparator)> pq(edgeComparator);
   for (const auto node: graph.getAdjacentNodes(0)) {
     pq.emplace(0, node, graph.getWeight(0, node));

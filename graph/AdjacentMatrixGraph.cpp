@@ -2,25 +2,50 @@
 #include <sstream>
 #include "AdjacentMatrixGraph.h"
 
+#include <cfloat>
 #include <iostream>
 
 namespace graph {
 
   void AdjacentMatrixGraph::initializeFromInput(std::istream &input) {
-    input >> numNodes;
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+
+    std::string line;
+    std::getline(input, line);
+    std::istringstream ls(line);
+    ls >> numNodes;
     adjacencyMatrix = new double[numNodes * numNodes];
-    int a, b;
-    while (input >> a >> b) {
-      if (a < 0 || a >= numNodes || b < 0 || b >= numNodes) {
-        std::cerr << "Invalid edge in input: " << a << " -> " << b << std::endl;
-        continue;
-      }
-      if (!directed && b < a) {
-        adjacencyMatrix[b * numNodes + a] = 1;
-      } else {
-        adjacencyMatrix[a * numNodes + b] = 1;
+    for (int i = 0; i < numNodes; i++) {
+      for (int j = 0; j < numNodes; j++) {
+        adjacencyMatrix[i * numNodes + j] = DBL_MAX;
       }
     }
+
+    std::getline(input, line);
+    ls = std::istringstream(line);
+    int u, v;
+    double w;
+    ls >> u >> v;
+    if (ls >> w) {
+      weighted = true;
+    }
+
+    do {
+      if (line.empty()) continue;
+      ls = std::istringstream(line);
+      ls >> u >> v;
+      double weight = 1;
+      if (weighted) {
+        ls >> weight;
+      }
+
+      if (!directed && v < u) {
+        adjacencyMatrix[v * numNodes + u] = weight;
+      } else {
+        adjacencyMatrix[u * numNodes + v] = weight;
+      }
+    } while (std::getline(input, line));
     initialized = true;
   }
 
@@ -35,15 +60,15 @@ namespace graph {
     for (int i = 0; i < numNodes; i++) {
       if (!directed) {
         if (i < node) {
-          if (adjacencyMatrix[i * numNodes + node] != 0) {
+          if (adjacencyMatrix[i * numNodes + node] != DBL_MAX) {
             adjacentNodes.push_back(i);
           }
         } else {
-          if (adjacencyMatrix[node * numNodes + i] != 0) {
+          if (adjacencyMatrix[node * numNodes + i] != DBL_MAX) {
             adjacentNodes.push_back(i);
           }
         }
-      } else if (adjacencyMatrix[node * numNodes + i] != 0) {
+      } else if (adjacencyMatrix[node * numNodes + i] != DBL_MAX) {
         adjacentNodes.push_back(i);
       }
     }
@@ -56,6 +81,10 @@ namespace graph {
   }
 
   double AdjacentMatrixGraph::getWeight(int u, int v) {
-    throw std::runtime_error("Not implemented yet.");
+    if (!initialized) {
+      throw std::runtime_error("Graph not initialized.");
+    }
+    if (!directed && v < u) std::swap(u, v);
+    return adjacencyMatrix[u * numNodes + v];
   }
 }
