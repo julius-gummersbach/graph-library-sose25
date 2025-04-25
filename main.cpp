@@ -19,13 +19,19 @@ using namespace std;
 
 const string INPUT_DIR = "../input/";
 
+using edge_t = graph::SuperGraph::edge_t;
 vector<int> depthFirstSearch(graph::SuperGraph &graph, int startNode, vector<bool> &visited);
 void assertFunctionOnGraph(const string& inputFile, graph::SuperGraph* graph, double function(graph::SuperGraph&), double expectedResult);
 double getConnectedComponents(graph::SuperGraph &graph);
-double getMSTPrimWeight(graph::SuperGraph &graph);
-double getMSTKruskalWeight(graph::SuperGraph &graph);
-vector<graph::EdgeListGraph::edge_t> getMSTPrim(graph::SuperGraph &graph);
-vector<graph::SuperGraph::edge_t> getMSTKruskal(graph::SuperGraph &graph);
+double evaluatePrim(graph::SuperGraph &graph);
+double evaluateKruskal(graph::SuperGraph &graph);
+vector<edge_t> getMSTPrim(graph::SuperGraph &graph);
+vector<edge_t> getMSTKruskal(graph::SuperGraph &graph);
+
+auto edgeComparator = [](const edge_t& lhs, const edge_t& rhs)
+{
+  return get<2>(lhs) > get<2>(rhs);
+};
 
 
 int main() {
@@ -36,19 +42,19 @@ int main() {
   assertFunctionOnGraph(INPUT_DIR + "0x01/Graph5.txt", new graph::AdjacentListGraph(), getConnectedComponents, 9560);
   assertFunctionOnGraph(INPUT_DIR + "0x01/Graph6.txt", new graph::AdjacentListGraph(), getConnectedComponents, 306);
 
-  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::AdjacentListGraph(), getMSTPrimWeight, 287.32286);
-  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_20.txt", new graph::AdjacentListGraph(), getMSTPrimWeight, 36.86275);
-  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_200.txt", new graph::AdjacentListGraph(), getMSTPrimWeight, 12.68182);
-  assertFunctionOnGraph(INPUT_DIR + "0x02/G_10_20.txt", new graph::AdjacentListGraph(), getMSTPrimWeight, 2785.62417);
-  assertFunctionOnGraph(INPUT_DIR + "0x02/G_10_200.txt", new graph::AdjacentListGraph(), getMSTPrimWeight, 372.14417);
-  assertFunctionOnGraph(INPUT_DIR + "0x02/G_100_200.txt", new graph::AdjacentListGraph(), getMSTPrimWeight, 27550.51488);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::AdjacentListGraph(), evaluatePrim, 287.32286);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_20.txt", new graph::AdjacentListGraph(), evaluatePrim, 36.86275);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_200.txt", new graph::AdjacentListGraph(), evaluatePrim, 12.68182);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_10_20.txt", new graph::AdjacentListGraph(), evaluatePrim, 2785.62417);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_10_200.txt", new graph::AdjacentListGraph(), evaluatePrim, 372.14417);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_100_200.txt", new graph::AdjacentListGraph(), evaluatePrim, 27550.51488);
 
-  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::EdgeListGraph(), getMSTKruskalWeight, 287.32286);
-  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_20.txt", new graph::EdgeListGraph(), getMSTKruskalWeight, 36.86275);
-  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_200.txt", new graph::EdgeListGraph(), getMSTKruskalWeight, 12.68182);
-  assertFunctionOnGraph(INPUT_DIR + "0x02/G_10_20.txt", new graph::EdgeListGraph(), getMSTKruskalWeight, 2785.62417);
-  assertFunctionOnGraph(INPUT_DIR + "0x02/G_10_200.txt", new graph::EdgeListGraph(), getMSTKruskalWeight, 372.14417);
-  assertFunctionOnGraph(INPUT_DIR + "0x02/G_100_200.txt", new graph::EdgeListGraph(), getMSTKruskalWeight, 27550.51488);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::EdgeListGraph(), evaluateKruskal, 287.32286);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_20.txt", new graph::EdgeListGraph(), evaluateKruskal, 36.86275);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_200.txt", new graph::EdgeListGraph(), evaluateKruskal, 12.68182);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_10_20.txt", new graph::EdgeListGraph(), evaluateKruskal, 2785.62417);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_10_200.txt", new graph::EdgeListGraph(), evaluateKruskal, 372.14417);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_100_200.txt", new graph::EdgeListGraph(), evaluateKruskal, 27550.51488);
 
   return 0;
 }
@@ -94,7 +100,25 @@ double getConnectedComponents(graph::SuperGraph &graph) {
   return connectedComponents;
 }
 
-double getMSTPrimWeight(graph::SuperGraph &graph) {
+vector<int> depthFirstSearch(graph::SuperGraph &graph, const int startNode, vector<bool> &visited) {
+  vector<int> subGraph;
+  subGraph.reserve(graph.numNodes / 2);
+  stack<int> stack{};
+  stack.push(startNode);
+  while (!stack.empty()) {
+    int currentNode = stack.top();
+    stack.pop();
+    subGraph.push_back(currentNode);
+    visited[currentNode] = true;
+    for (const vector<int> &adjacent = graph.getAdjacentNodes(currentNode); int node: adjacent) {
+      if (visited[node]) continue;
+      stack.push(node);
+    }
+  }
+  return subGraph;
+}
+
+double evaluatePrim(graph::SuperGraph &graph) {
   const auto mst = getMSTPrim(graph);
   double weight = 0;
   for (const auto edge: mst) {
@@ -103,7 +127,7 @@ double getMSTPrimWeight(graph::SuperGraph &graph) {
   return weight;
 }
 
-double getMSTKruskalWeight(graph::SuperGraph &graph) {
+double evaluateKruskal(graph::SuperGraph &graph) {
   const auto mst = getMSTKruskal(graph);
   double weight = 0;
   for (const auto edge: mst) {
@@ -112,20 +136,13 @@ double getMSTKruskalWeight(graph::SuperGraph &graph) {
   return weight;
 }
 
-vector<graph::SuperGraph::edge_t> getMSTPrim(graph::SuperGraph &graph) {
-  using edge_t = graph::SuperGraph::edge_t;
-
-  auto cmp = [](const edge_t& lhs, const edge_t& rhs)
-  {
-    return get<2>(lhs) > get<2>(rhs);
-  };
-
-  priority_queue<edge_t, vector<edge_t>, decltype(cmp)> pq(cmp);
+vector<edge_t> getMSTPrim(graph::SuperGraph &graph) {
+  priority_queue<edge_t, vector<edge_t>, decltype(edgeComparator)> pq(edgeComparator);
   for (const auto node: graph.getAdjacentNodes(0)) {
     pq.emplace(0, node, graph.getWeight(0, node));
   }
 
-  vector<graph::SuperGraph::edge_t> mst;
+  vector<edge_t> mst;
   vector found(graph.numNodes, false);
   found[0] = true;
   while (mst.size() < graph.numNodes - 1) {
@@ -143,9 +160,7 @@ vector<graph::SuperGraph::edge_t> getMSTPrim(graph::SuperGraph &graph) {
   return mst;
 }
 
-vector<graph::SuperGraph::edge_t> getMSTKruskal(graph::SuperGraph &graph) {
-  using edge_t = graph::SuperGraph::edge_t;
-
+vector<edge_t> getMSTKruskal(graph::SuperGraph &graph) {
   auto cmp = [](const edge_t& lhs, const edge_t& rhs)
   {
     return get<2>(lhs) > get<2>(rhs);
@@ -157,7 +172,7 @@ vector<graph::SuperGraph::edge_t> getMSTKruskal(graph::SuperGraph &graph) {
     pq.emplace(edge);
   }
 
-  vector<graph::SuperGraph::edge_t> mst;
+  vector<edge_t> mst;
   helper::UnionFind uf(graph.numNodes);
   while (mst.size() < graph.numNodes - 1) {
     if (pq.empty()) {
@@ -169,23 +184,4 @@ vector<graph::SuperGraph::edge_t> getMSTKruskal(graph::SuperGraph &graph) {
     }
   }
   return mst;
-}
-
-
-vector<int> depthFirstSearch(graph::SuperGraph &graph, const int startNode, vector<bool> &visited) {
-  vector<int> subGraph;
-  subGraph.reserve(graph.numNodes / 2);
-  stack<int> stack{};
-  stack.push(startNode);
-  while (!stack.empty()) {
-    int currentNode = stack.top();
-    stack.pop();
-    subGraph.push_back(currentNode);
-    visited[currentNode] = true;
-    for (const vector<int> &adjacent = graph.getAdjacentNodes(currentNode); int node: adjacent) {
-      if (visited[node]) continue;
-      stack.push(node);
-    }
-  }
-  return subGraph;
 }
