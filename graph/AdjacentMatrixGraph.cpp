@@ -50,9 +50,6 @@ namespace graph {
   }
 
   const std::vector<int>& AdjacentMatrixGraph::getAdjacentNodes(int node) {
-    if (!initialized) {
-      throw std::runtime_error("Graph not initialized.");
-    }
     if (adjacencyCache.contains(node)) {
       return adjacencyCache.at(node);
     }
@@ -80,11 +77,8 @@ namespace graph {
     throw std::runtime_error("Not implemented yet.");
   }
 
-  double AdjacentMatrixGraph::getWeight(int u, int v) {
-    if (!initialized) {
-      throw std::runtime_error("Graph not initialized.");
-    }
-    if (!directed && v < u) std::swap(u, v);
+  double AdjacentMatrixGraph::getWeight(const int u, const int v) {
+    if (!directed && v < u) return adjacencyMatrix[v * numNodes + u];
     return adjacencyMatrix[u * numNodes + v];
   }
 }
