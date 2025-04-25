@@ -1,38 +1,26 @@
 #include <iostream>
 #include <fstream>
-#include <set>
 #include <string>
 #include <vector>
-#include <memory>
 #include <chrono>
-#include <stack>
 #include <cassert>
 
 #include "graph/SuperGraph.h"
 #include "graph/EdgeListGraph.h"
 #include "graph/AdjacentMatrixGraph.h"
 #include "graph/AdjacentListGraph.h"
-#include "helper/UnionFind.h"
+
+#include "0x01.cpp"
+#include "0x02.cpp"
 
 using namespace std;
-
+using edge_t = graph::SuperGraph::edge_t;
 
 const string INPUT_DIR = "../input/";
 
-using edge_t = graph::SuperGraph::edge_t;
-vector<int> depthFirstSearch(graph::SuperGraph &graph, int startNode, vector<bool> &visited);
 void assertFunctionOnGraph(const string& inputFile, graph::SuperGraph* graph, double function(graph::SuperGraph&), double expectedResult);
-double getConnectedComponents(graph::SuperGraph &graph);
 double evaluatePrim(graph::SuperGraph &graph);
 double evaluateKruskal(graph::SuperGraph &graph);
-vector<edge_t> getMSTPrim(graph::SuperGraph &graph);
-vector<edge_t> getMSTKruskal(graph::SuperGraph &graph);
-
-auto edgeComparator = [](const edge_t& lhs, const edge_t& rhs)
-{
-  return get<2>(lhs) > get<2>(rhs);
-};
-
 
 int main() {
   assertFunctionOnGraph(INPUT_DIR + "0x01/Graph1.txt", new graph::AdjacentMatrixGraph(), getConnectedComponents, 2);
@@ -88,36 +76,6 @@ void assertFunctionOnGraph(const string& inputFile, graph::SuperGraph* graph, do
   delete graph;
 }
 
-double getConnectedComponents(graph::SuperGraph &graph) {
-  double connectedComponents = 0;
-  vector visited(graph.numNodes, false);
-
-  for (int node = 0; node < graph.numNodes; node++) {
-    if (visited[node]) continue;
-    connectedComponents++;
-    depthFirstSearch(graph, node, visited);
-  }
-  return connectedComponents;
-}
-
-vector<int> depthFirstSearch(graph::SuperGraph &graph, const int startNode, vector<bool> &visited) {
-  vector<int> subGraph;
-  subGraph.reserve(graph.numNodes / 2);
-  stack<int> stack{};
-  stack.push(startNode);
-  while (!stack.empty()) {
-    int currentNode = stack.top();
-    stack.pop();
-    subGraph.push_back(currentNode);
-    visited[currentNode] = true;
-    for (const vector<int> &adjacent = graph.getAdjacentNodes(currentNode); int node: adjacent) {
-      if (visited[node]) continue;
-      stack.push(node);
-    }
-  }
-  return subGraph;
-}
-
 double evaluatePrim(graph::SuperGraph &graph) {
   const auto mst = getMSTPrim(graph);
   double weight = 0;
@@ -134,54 +92,4 @@ double evaluateKruskal(graph::SuperGraph &graph) {
     weight += get<2>(edge);
   }
   return weight;
-}
-
-vector<edge_t> getMSTPrim(graph::SuperGraph &graph) {
-  priority_queue<edge_t, vector<edge_t>, decltype(edgeComparator)> pq(edgeComparator);
-  for (const auto node: graph.getAdjacentNodes(0)) {
-    pq.emplace(0, node, graph.getWeight(0, node));
-  }
-
-  vector<edge_t> mst;
-  vector found(graph.numNodes, false);
-  found[0] = true;
-  while (mst.size() < graph.numNodes - 1) {
-    auto edge = pq.top(); pq.pop();
-    int v = get<1>(edge);
-    if (!found[v]) {
-      found[v] = true;
-      mst.push_back(edge);
-      for (const auto node: graph.getAdjacentNodes(v)) {
-        if (found[node]) continue;
-        pq.emplace(v, node, graph.getWeight(v, node));
-      }
-    }
-  }
-  return mst;
-}
-
-vector<edge_t> getMSTKruskal(graph::SuperGraph &graph) {
-  auto cmp = [](const edge_t& lhs, const edge_t& rhs)
-  {
-    return get<2>(lhs) > get<2>(rhs);
-  };
-
-  priority_queue<edge_t, vector<edge_t>, decltype(cmp)> pq(cmp);
-  auto edges = graph.getEdges();
-  for (const auto edge: edges) {
-    pq.emplace(edge);
-  }
-
-  vector<edge_t> mst;
-  helper::UnionFind uf(graph.numNodes);
-  while (mst.size() < graph.numNodes - 1) {
-    if (pq.empty()) {
-      throw std::invalid_argument("Graph is not connected");
-    }
-    auto edge = pq.top(); pq.pop();
-    if (uf.unionSets(get<0>(edge), get<1>(edge))) {
-      mst.push_back(edge);
-    }
-  }
-  return mst;
 }

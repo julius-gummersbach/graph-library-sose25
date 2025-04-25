@@ -1,7 +1,3 @@
-//
-// Created by Julius Gummersbach on 22.04.25.
-//
-
 #include "UnionFind.h"
 
 namespace helper {
