@@ -4,6 +4,10 @@
 
 using namespace std;
 
+/**
+ * @param visited array denoting which nodes were already visited
+ * @return the order the nodes were visited in
+ */
 vector<int> depthFirstSearch(graph::SuperGraph &graph, const int startNode, vector<bool> &visited) {
   vector<int> subGraph;
   subGraph.reserve(graph.numNodes / 2);
@@ -22,6 +26,9 @@ vector<int> depthFirstSearch(graph::SuperGraph &graph, const int startNode, vect
   return subGraph;
 }
 
+/**
+ * @return number of connected components graph consists of
+ */
 double getConnectedComponents(graph::SuperGraph &graph) {
   double connectedComponents = 0;
   vector visited(graph.numNodes, false);

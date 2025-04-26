@@ -23,6 +23,7 @@ void assertFunctionOnGraph(const string& inputFile, graph::SuperGraph* graph, do
 double evaluatePrim(graph::SuperGraph &graph);
 double evaluateKruskal(graph::SuperGraph &graph);
 double evaluateNearestNeighbor(graph::SuperGraph &graph);
+double evaluateDoubleTree(graph::SuperGraph &graph);
 double evaluateTspBruteForce(graph::SuperGraph &graph);
 double evaluateTspBnB(graph::SuperGraph &graph);
 
@@ -77,6 +78,22 @@ int main() {
   assertFunctionOnGraph(INPUT_DIR + "0x03/K_70.txt", new graph::AdjacentListGraph(), evaluateNearestNeighbor, 1);
   assertFunctionOnGraph(INPUT_DIR + "0x03/K_100.txt", new graph::AdjacentListGraph(), evaluateNearestNeighbor, 1);
 
+  // 0x03, double tree
+  cout << "############################################" << endl;
+  cout << "############################################" << endl;
+  cout << "0x03, double tree" << endl;
+  assertFunctionOnGraph(INPUT_DIR + "0x03/K_10.txt", new graph::AdjacentListGraph(), evaluateDoubleTree, 1);
+  assertFunctionOnGraph(INPUT_DIR + "0x03/K_10e.txt", new graph::AdjacentListGraph(), evaluateDoubleTree, 1);
+  assertFunctionOnGraph(INPUT_DIR + "0x03/K_12.txt", new graph::AdjacentListGraph(), evaluateDoubleTree, 1);
+  assertFunctionOnGraph(INPUT_DIR + "0x03/K_12e.txt", new graph::AdjacentListGraph(), evaluateDoubleTree, 1);
+  assertFunctionOnGraph(INPUT_DIR + "0x03/K_15.txt", new graph::AdjacentListGraph(), evaluateDoubleTree, 1);
+  assertFunctionOnGraph(INPUT_DIR + "0x03/K_15e.txt", new graph::AdjacentListGraph(), evaluateDoubleTree, 1);
+  assertFunctionOnGraph(INPUT_DIR + "0x03/K_20.txt", new graph::AdjacentListGraph(), evaluateDoubleTree, 1);
+  assertFunctionOnGraph(INPUT_DIR + "0x03/K_30.txt", new graph::AdjacentListGraph(), evaluateDoubleTree, 1);
+  assertFunctionOnGraph(INPUT_DIR + "0x03/K_50.txt", new graph::AdjacentListGraph(), evaluateDoubleTree, 1);
+  assertFunctionOnGraph(INPUT_DIR + "0x03/K_70.txt", new graph::AdjacentListGraph(), evaluateDoubleTree, 1);
+  assertFunctionOnGraph(INPUT_DIR + "0x03/K_100.txt", new graph::AdjacentListGraph(), evaluateDoubleTree, 1);
+
   // 0x03, TSP Brute-Force und BnB
   cout << "############################################" << endl;
   cout << "############################################" << endl;
@@ -101,6 +118,13 @@ int main() {
   return 0;
 }
 
+/**
+ * Asserts if the expected results occurs and prints execution times to std::cout
+ * @param inputFile file to read input from into graph
+ * @param graph graph object to use for calculation
+ * @param function a function that runs on a graph object and returns a double
+ * @param expectedResult expected result of function if run on graph
+ */
 void assertFunctionOnGraph(const string& inputFile, graph::SuperGraph* graph, double function(graph::SuperGraph&), double expectedResult) {
   cout << "Reading from file " << inputFile << endl;
   auto start = chrono::high_resolution_clock::now();
@@ -134,6 +158,9 @@ void assertFunctionOnGraph(const string& inputFile, graph::SuperGraph* graph, do
   delete graph;
 }
 
+/**
+ * @return weight of the result of Prim if executed on graph
+ */
 double evaluatePrim(graph::SuperGraph &graph) {
   const auto mst = getMSTPrim(graph);
   double weight = 0;
@@ -143,6 +170,9 @@ double evaluatePrim(graph::SuperGraph &graph) {
   return weight;
 }
 
+/**
+ * @return weight of the result of Kruskal if executed on graph
+ */
 double evaluateKruskal(graph::SuperGraph &graph) {
   const auto mst = getMSTKruskal(graph);
   double weight = 0;
@@ -152,6 +182,11 @@ double evaluateKruskal(graph::SuperGraph &graph) {
   return weight;
 }
 
+/**
+ * checks, if the given edge list is a hamilton-circle and prints it and its weight to std::cout
+ * @param circle an edge list
+ * @return 1 if circle is a hamilton circle, 0 otherwise
+ */
 double printAndCheckHamilton(vector<edge_t> circle) {
   const int startNode = get<0>(circle[0]);
   double weight = 0;
@@ -169,12 +204,27 @@ double printAndCheckHamilton(vector<edge_t> circle) {
   return 1;
 }
 
+/**
+ * @return weight of the result of NearestNeighbor if executed on graph
+ */
 double evaluateNearestNeighbor(graph::SuperGraph &graph) {
   const auto hamilton = nearestNeighbors(graph, 0);
   if (hamilton.size() != graph.numNodes) return 0;
   return printAndCheckHamilton(hamilton);
 }
 
+/**
+ * @return weight of the result of DoubleTree if executed on graph
+ */
+double evaluateDoubleTree(graph::SuperGraph &graph) {
+  const auto hamilton = doubleTreeAlgorthm(graph);
+  if (hamilton.size() != graph.numNodes) return 0;
+  return printAndCheckHamilton(hamilton);
+}
+
+/**
+ * @return weight of the result of TspBruteForce if executed on graph with branch and bound disabled
+ */
 double evaluateTspBruteForce(graph::SuperGraph &graph) {
   if (graph.numNodes > 20) cout << "This is a bad idea...";
   auto shortestHamilton = bruteForceTsp(graph, false);
@@ -182,6 +232,9 @@ double evaluateTspBruteForce(graph::SuperGraph &graph) {
   return printAndCheckHamilton(shortestHamilton);
 }
 
+/**
+ * @return weight of the result of TspBruteForce if executed on graph with branch and bound enabled
+ */
 double evaluateTspBnB(graph::SuperGraph &graph) {
   auto shortestHamilton = bruteForceTsp(graph, true);
   if (shortestHamilton.size() != graph.numNodes) return 0;

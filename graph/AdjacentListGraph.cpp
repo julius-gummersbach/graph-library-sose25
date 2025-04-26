@@ -6,6 +6,29 @@
 namespace graph {
   using namespace std;
 
+  AdjacentListGraph::AdjacentListGraph() = default;
+
+  AdjacentListGraph::AdjacentListGraph(const vector<edge_t>& mstEdgeList) {
+    numNodes = mstEdgeList.size() + 1;
+    adjacencyList.resize(numNodes);
+    weights.resize(numNodes);
+    for (auto list : adjacencyList) {
+      list.resize(15);
+    }
+    for (int i = 0; i < numNodes; ++i) {
+      adjacencyList[i].reserve(15);
+      weights[i].reserve(15);
+    }
+    for (auto edge : mstEdgeList) {
+      adjacencyList[get<0>(edge)].push_back(get<1>(edge));
+      adjacencyList[get<1>(edge)].push_back(get<0>(edge));
+      weights[get<0>(edge)].push_back(get<2>(edge));
+      weights[get<1>(edge)].push_back(get<2>(edge));
+    }
+    initialized = true;
+  }
+
+
   void AdjacentListGraph::initializeFromInput(istream &input) {
     std::ios::sync_with_stdio(false);
     std::cin.tie(nullptr);
@@ -47,16 +70,10 @@ namespace graph {
   }
 
   const vector<int> & AdjacentListGraph::getAdjacentNodes(int node) {
-    if (!initialized) {
-      throw runtime_error("Graph not initialized.");
-    }
     return adjacencyList[node];
   }
 
   std::vector<SuperGraph::edge_t> AdjacentListGraph::getEdges() {
-    if (!initialized) {
-      throw std::runtime_error("Graph not initialized.");
-    }
     throw runtime_error("Not implemented yet.");
     /* implemented, but not tested yet
     std::vector<std::array<int, 2>> edges;
@@ -69,9 +86,6 @@ namespace graph {
   }
 
   double AdjacentListGraph::getWeight(const int u, const int v) {
-    if (!initialized) {
-      throw runtime_error("Graph not initialized.");
-    }
     if (!weighted) {
       throw runtime_error("Graph is not weighted.");
     }

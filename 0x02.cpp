@@ -6,7 +6,10 @@
 using namespace std;
 using edge_t = graph::SuperGraph::edge_t;
 
-
+/**
+ * Performs Prim algorithm
+ * @return edge list of the MST
+ */
 vector<edge_t> getMSTPrim(graph::SuperGraph &graph) {
   auto edgeComparator = [](const edge_t& lhs, const edge_t& rhs)
   {
@@ -36,6 +39,10 @@ vector<edge_t> getMSTPrim(graph::SuperGraph &graph) {
   return mst;
 }
 
+/**
+ * Performs Kruskal algorithm
+ * @return edge list of the MST
+ */
 vector<edge_t> getMSTKruskal(graph::SuperGraph &graph) {
   auto cmp = [](const edge_t& lhs, const edge_t& rhs)
   {
