@@ -115,9 +115,10 @@ vector<edge_t> bruteForceTsp(graph::SuperGraph &graph, const bool branchAndBound
  */
 void bruteForceTspRec(graph::SuperGraph &graph, const bool branchAndBound, const int startNode, vector<bool>& visited, vector<int>& current, vector<int>& best, double& currentWeight, double& bestWeight) {
   if (current.size() == graph.numNodes) {
-    if (currentWeight + graph.getWeight(current.back(), startNode) < bestWeight) {
+    double weightBackToStartNode = graph.getWeight(current.back(), startNode);
+    if (currentWeight + weightBackToStartNode < bestWeight) {
       best = current;
-      bestWeight = currentWeight + graph.getWeight(current.back(), startNode);
+      bestWeight = currentWeight + weightBackToStartNode;
     }
     return;
   }
