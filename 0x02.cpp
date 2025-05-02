@@ -16,23 +16,23 @@ vector<edge_t> getMSTPrim(graph::SuperGraph &graph) {
     return get<2>(lhs) > get<2>(rhs);
   };
 
-  priority_queue<edge_t, vector<edge_t>, decltype(edgeComparator)> pq(edgeComparator);
+  priority_queue<edge_t, vector<edge_t>, decltype(edgeComparator)> frontier(edgeComparator);
   for (const auto node: graph.getAdjacentNodes(0)) {
-    pq.emplace(0, node, graph.getWeight(0, node));
+    frontier.emplace(0, node, graph.getWeight(0, node));
   }
 
   vector<edge_t> mst;
   vector found(graph.numNodes, false);
   found[0] = true;
   while (mst.size() < graph.numNodes - 1) {
-    auto edge = pq.top(); pq.pop();
+    auto edge = frontier.top(); frontier.pop();
     int v = get<1>(edge);
     if (!found[v]) {
       found[v] = true;
       mst.push_back(edge);
       for (const auto node: graph.getAdjacentNodes(v)) {
         if (found[node]) continue;
-        pq.emplace(v, node, graph.getWeight(v, node));
+        frontier.emplace(v, node, graph.getWeight(v, node));
       }
     }
   }
@@ -49,19 +49,19 @@ vector<edge_t> getMSTKruskal(graph::SuperGraph &graph) {
     return get<2>(lhs) > get<2>(rhs);
   };
 
-  priority_queue<edge_t, vector<edge_t>, decltype(cmp)> pq(cmp);
+  priority_queue<edge_t, vector<edge_t>, decltype(cmp)> sortedEdges(cmp);
   auto edges = graph.getEdges();
   for (const auto edge: edges) {
-    pq.emplace(edge);
+    sortedEdges.emplace(edge);
   }
 
   vector<edge_t> mst;
   helper::UnionFind uf(graph.numNodes);
   while (mst.size() < graph.numNodes - 1) {
-    if (pq.empty()) {
+    if (sortedEdges.empty()) {
       throw std::invalid_argument("Graph is not connected");
     }
-    auto edge = pq.top(); pq.pop();
+    auto edge = sortedEdges.top(); sortedEdges.pop();
     if (uf.unionSets(get<0>(edge), get<1>(edge))) {
       mst.push_back(edge);
     }
