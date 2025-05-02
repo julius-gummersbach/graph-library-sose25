@@ -105,13 +105,13 @@ int main() {
   assertFunctionOnGraph(INPUT_DIR + "0x03/K_15.txt", new graph::AdjacentMatrixGraph(), evaluateTspBnB, 1);
   assertFunctionOnGraph(INPUT_DIR + "0x03/K_15e.txt", new graph::AdjacentMatrixGraph(), evaluateTspBnB, 1);
   assertFunctionOnGraph(INPUT_DIR + "0x03/K_20.txt", new graph::AdjacentMatrixGraph(), evaluateTspBnB, 1);  // 1.5s
-  // K_30 would take 5 million years or so...
+  // K_30 would take a couple million years...
 
   assertFunctionOnGraph(INPUT_DIR + "0x03/K_10.txt", new graph::AdjacentMatrixGraph(), evaluateTspBruteForce, 1);
   assertFunctionOnGraph(INPUT_DIR + "0x03/K_10e.txt", new graph::AdjacentMatrixGraph(), evaluateTspBruteForce, 1);
   assertFunctionOnGraph(INPUT_DIR + "0x03/K_12.txt", new graph::AdjacentMatrixGraph(), evaluateTspBruteForce, 1);
   assertFunctionOnGraph(INPUT_DIR + "0x03/K_12e.txt", new graph::AdjacentMatrixGraph(), evaluateTspBruteForce, 1);
-  /* these would be expected to take roughly 8 hours
+  /* these would be expected to take roughly 30min
   assertFunctionOnGraph(INPUT_DIR + "0x03/K_15.txt", new graph::AdjacentMatrixGraph(), evaluateTspBruteForce, 1);
   assertFunctionOnGraph(INPUT_DIR + "0x03/K_15e.txt", new graph::AdjacentMatrixGraph(), evaluateTspBruteForce, 1); */
 

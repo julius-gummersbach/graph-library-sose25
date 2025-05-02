@@ -18,7 +18,7 @@ namespace graph {
     adjacencyMatrix = new double[numNodes * numNodes];
     for (int i = 0; i < numNodes; i++) {
       for (int j = 0; j < numNodes; j++) {
-        adjacencyMatrix[i * numNodes + j] = DBL_MAX;
+        adjacencyMatrix[i * numNodes + j] = INFINITY;
       }
     }
 
@@ -57,15 +57,15 @@ namespace graph {
     for (int i = 0; i < numNodes; i++) {
       if (!directed) {
         if (i < node) {
-          if (adjacencyMatrix[i * numNodes + node] != DBL_MAX) {
+          if (adjacencyMatrix[i * numNodes + node] != INFINITY) {
             adjacentNodes.push_back(i);
           }
         } else {
-          if (adjacencyMatrix[node * numNodes + i] != DBL_MAX) {
+          if (adjacencyMatrix[node * numNodes + i] != INFINITY) {
             adjacentNodes.push_back(i);
           }
         }
-      } else if (adjacencyMatrix[node * numNodes + i] != DBL_MAX) {
+      } else if (adjacencyMatrix[node * numNodes + i] != INFINITY) {
         adjacentNodes.push_back(i);
       }
     }

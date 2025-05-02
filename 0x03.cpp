@@ -8,44 +8,39 @@ using edge_t = graph::SuperGraph::edge_t;
 
 
 /**
- * @param graph a complete graph with no negative edge weights that satisfies the triangle inequality
+ * @param graph a complete graph
  * @param startNode
  * @return edge list of a hamilton path
  */
 vector<edge_t> nearestNeighbors(graph::SuperGraph &graph, const int startNode) {
-  auto edgeComparator = [](const edge_t& lhs, const edge_t& rhs)
-  {
-    return get<2>(lhs) > get<2>(rhs);
-  };
-
   vector<edge_t> hamilton;
   hamilton.reserve(graph.numNodes);
   vector visited(graph.numNodes, false);
 
   int currentNode = startNode;
   visited[startNode] = true;
-  while (hamilton.size() < graph.numNodes) {
-    auto adjacent = graph.getAdjacentNodes(currentNode);
-    priority_queue<edge_t, vector<edge_t>, decltype(edgeComparator)> sortedNeighbors(edgeComparator);
-    for (const auto node: adjacent) {
-      sortedNeighbors.emplace(currentNode, node, graph.getWeight(node, currentNode));
+  while (hamilton.size() < graph.numNodes - 1) {
+    int closestNode = 0;
+    double minDist = INFINITY;
+    // find closest unvisited node
+    for (int node = 0; node < graph.numNodes; node++) {
+      if (visited[node]) continue;
+      double weight = graph.getWeight(currentNode, node);
+      if (weight < minDist) {
+        closestNode = node;
+        minDist = weight;
+      }
     }
-    if (hamilton.size() == graph.numNodes - 1) {
-      // find edge back to startNode to complete circle
-      while (get<1>(sortedNeighbors.top()) != startNode) sortedNeighbors.pop();
-    } else {
-      // find shortest edge to unvisited node
-      while (visited[get<1>(sortedNeighbors.top())]) sortedNeighbors.pop();
-    }
-    visited[get<1>(sortedNeighbors.top())] = true;
-    hamilton.push_back(sortedNeighbors.top());
-    currentNode = get<1>(sortedNeighbors.top());
+    visited[closestNode] = true;
+    hamilton.emplace_back(currentNode, closestNode, graph.getWeight(closestNode, currentNode));  // todo getEdge(u,v)
+    currentNode = closestNode;
   }
+  hamilton.emplace_back(currentNode, startNode, graph.getWeight(startNode, currentNode));  // todo getEdge(u,v)
   return hamilton;
 }
 
 /**
- * @param graph a complete graph with no negative edge weights that satisfies the triangle inequality
+ * @param graph a complete graph
  * @return edge list of a hamilton path, that is at most 2 times worse than the optimal solution
  */
 vector<edge_t> doubleTreeAlgorthm(graph::SuperGraph &graph) {
@@ -66,7 +61,7 @@ vector<edge_t> doubleTreeAlgorthm(graph::SuperGraph &graph) {
   return hamilton;
 }
 
-void bruteForceTspRec(graph::SuperGraph &graph, bool branchAndBound, int startNode, vector<bool>& visited, vector<int>& current, vector<int>& best, double& currentWeight, double& bestWeight);
+void bruteForceTspRec(graph::SuperGraph &graph, bool branchAndBound, int startNode, vector<bool>& visited, vector<int>& current, vector<int>& best, double currentWeight, double& bestWeight);
 bool boundCondition(graph::SuperGraph &graph, int startNode, const vector<bool>& visited, const vector<int>& current, const double& currentWeight, const double& bestWeight);
 
 /**
@@ -82,15 +77,12 @@ vector<edge_t> bruteForceTsp(graph::SuperGraph &graph, const bool branchAndBound
   vector<int> best;
   best.reserve(graph.numNodes);
   double currentWeight = 0.0;
-  double bestWeight = DBL_MAX;
+  double bestWeight = INFINITY;
 
-  for (int i = 0 ; i < graph.numNodes; i++) {
-    current.push_back(i);
-    visited[i] = true;
-    bruteForceTspRec(graph, branchAndBound, i, visited, current, best, currentWeight, bestWeight);
-    current.pop_back();
-    visited[i] = false;
-  }
+  constexpr int startNode = 0;  // it is sufficient to start from one of the nodes, because the circles found from the other nodes will be equivalent
+  current.push_back(startNode);
+  visited[startNode] = true;
+  bruteForceTspRec(graph, branchAndBound, startNode, visited, current, best, currentWeight, bestWeight);
 
   // construct edge list from node list
   vector<edge_t> result;
@@ -108,12 +100,12 @@ vector<edge_t> bruteForceTsp(graph::SuperGraph &graph, const bool branchAndBound
  * @param branchAndBound whether to use branch and bound
  * @param startNode the node the search was started from. Needed to check the cost of returning to the start node
  * @param visited which nodes were already visited in the current call
- * @param current current node
+ * @param current path
  * @param best best hamilton circle found so far
  * @param currentWeight
  * @param bestWeight weight sum of best hamilton circle found so far
  */
-void bruteForceTspRec(graph::SuperGraph &graph, const bool branchAndBound, const int startNode, vector<bool>& visited, vector<int>& current, vector<int>& best, double& currentWeight, double& bestWeight) {
+void bruteForceTspRec(graph::SuperGraph &graph, const bool branchAndBound, const int startNode, vector<bool>& visited, vector<int>& current, vector<int>& best, const double currentWeight, double& bestWeight) {
   if (current.size() == graph.numNodes) {
     double weightBackToStartNode = graph.getWeight(current.back(), startNode);
     if (currentWeight + weightBackToStartNode < bestWeight) {
@@ -128,12 +120,11 @@ void bruteForceTspRec(graph::SuperGraph &graph, const bool branchAndBound, const
   for (int i = 0 ; i < graph.numNodes; i++) {
     if (visited[i]) continue;
     visited[i] = true;
-    currentWeight += graph.getWeight(current.back(), i);
+    const double newWeight = graph.getWeight(current.back(), i);
     current.push_back(i);
-    bruteForceTspRec(graph, branchAndBound, startNode, visited, current, best, currentWeight, bestWeight);
+    bruteForceTspRec(graph, branchAndBound, startNode, visited, current, best, currentWeight + newWeight, bestWeight);
     visited[i] = false;
     current.pop_back();
-    currentWeight -= graph.getWeight(current.back(), i);
   }
 }
 
@@ -155,8 +146,8 @@ bool boundCondition(graph::SuperGraph &graph, const int startNode, const vector<
   for (int u = 0; u < graph.numNodes; u++) {
     if (visited[u] && u != startNode) continue;
     // find cheapest and secondToCheapest edges
-    double cheapestWeight = DBL_MAX;
-    double secondCheapestWeight  = DBL_MAX;
+    double cheapestWeight = INFINITY;
+    double secondCheapestWeight  = INFINITY;
     for (int v = 0; v < graph.numNodes; v++) {
       if ((visited[v] && u != startNode) || u == v) continue;
       const double weight = graph.getWeight(u, v);
@@ -170,7 +161,10 @@ bool boundCondition(graph::SuperGraph &graph, const int startNode, const vector<
     }
     // assume these can be used, what would the best weight of the current branch be
     // because edges will be counted twice by this approach: * 0.5
-    bestCaseWeight += 0.5 * (cheapestWeight + secondCheapestWeight);
+    bestCaseWeight += 0.5 * cheapestWeight;
+    if (u != startNode) {
+      bestCaseWeight += 0.5 * secondCheapestWeight;
+    }
   }
   return bestCaseWeight >= bestWeight;
 }
