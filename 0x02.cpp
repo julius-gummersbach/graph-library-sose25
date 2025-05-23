@@ -1,38 +1,49 @@
 #include <vector>
 
+#include "edge/WeightedEdge.h"
 #include "graph/SuperGraph.h"
 #include "helper/UnionFind.h"
 
 using namespace std;
-using edge_t = graph::SuperGraph::edge_t;
 
 /**
  * Performs Prim algorithm
+ * @graph a weighted graph
  * @return edge list of the MST
  */
-vector<edge_t> getMSTPrim(graph::SuperGraph &graph) {
-  auto edgeComparator = [](const edge_t& lhs, const edge_t& rhs)
-  {
-    return get<2>(lhs) > get<2>(rhs);
+vector<std::shared_ptr<const edge::WeightedEdge>> getMSTPrim(graph::SuperGraph &graph) {
+  if (!graph.weighted) {
+    throw std::invalid_argument("Graph is not weighted");
+  }
+  struct CompareEdgePtrs {
+    bool operator()(const std::shared_ptr<const edge::WeightedEdge>& a,
+                    const std::shared_ptr<const edge::WeightedEdge>& b) const {
+      return *a < *b;
+    }
   };
 
-  priority_queue<edge_t, vector<edge_t>, decltype(edgeComparator)> frontier(edgeComparator);
-  for (const auto node: graph.getAdjacentNodes(0)) {
-    frontier.emplace(0, node, graph.getWeight(0, node));
+  std::priority_queue<
+      std::shared_ptr<const edge::WeightedEdge>,
+      std::vector<std::shared_ptr<const edge::WeightedEdge>>,
+      CompareEdgePtrs
+  > frontier;
+
+  for (const auto& edge: graph.getAdjacent(0)) {
+    frontier.push(std::dynamic_pointer_cast<const edge::WeightedEdge>(edge));
   }
 
-  vector<edge_t> mst;
+  vector<std::shared_ptr<const edge::WeightedEdge>> mst;
   vector found(graph.numNodes, false);
   found[0] = true;
   while (mst.size() < graph.numNodes - 1) {
-    auto edge = frontier.top(); frontier.pop();
-    int v = get<1>(edge);
+    auto cheapestOutgoingEdge = frontier.top(); frontier.pop();
+    int v = cheapestOutgoingEdge->getTo();
     if (!found[v]) {
       found[v] = true;
-      mst.push_back(edge);
-      for (const auto node: graph.getAdjacentNodes(v)) {
-        if (found[node]) continue;
-        frontier.emplace(v, node, graph.getWeight(v, node));
+      mst.push_back(cheapestOutgoingEdge);
+      for (const auto& adjacentEdge: graph.getAdjacent(v)) {
+        if (found[adjacentEdge->getTo()]) continue;
+        frontier.push(std::dynamic_pointer_cast<const edge::WeightedEdge>(adjacentEdge));
       }
     }
   }
@@ -43,26 +54,36 @@ vector<edge_t> getMSTPrim(graph::SuperGraph &graph) {
  * Performs Kruskal algorithm
  * @return edge list of the MST
  */
-vector<edge_t> getMSTKruskal(graph::SuperGraph &graph) {
-  auto cmp = [](const edge_t& lhs, const edge_t& rhs)
-  {
-    return get<2>(lhs) > get<2>(rhs);
+vector<std::shared_ptr<const edge::WeightedEdge>> getMSTKruskal(graph::SuperGraph &graph) {
+  if (!graph.weighted) {
+    throw std::invalid_argument("Graph is not weighted");
+  }
+  struct CompareEdgePtrs {
+    bool operator()(const std::shared_ptr<const edge::WeightedEdge>& a,
+                    const std::shared_ptr<const edge::WeightedEdge>& b) const {
+      return *a < *b;
+    }
   };
 
-  priority_queue<edge_t, vector<edge_t>, decltype(cmp)> sortedEdges(cmp);
+  std::priority_queue<
+      std::shared_ptr<const edge::WeightedEdge>,
+      std::vector<std::shared_ptr<const edge::WeightedEdge>>,
+      CompareEdgePtrs
+  > sortedEdges;
+
   auto edges = graph.getEdges();
-  for (const auto edge: edges) {
-    sortedEdges.emplace(edge);
+  for (const auto& edge: edges) {
+    sortedEdges.push(std::dynamic_pointer_cast<const edge::WeightedEdge>(edge));
   }
 
-  vector<edge_t> mst;
+  vector<std::shared_ptr<const edge::WeightedEdge>> mst;
   helper::UnionFind uf(graph.numNodes);
   while (mst.size() < graph.numNodes - 1) {
     if (sortedEdges.empty()) {
       throw std::invalid_argument("Graph is not connected");
     }
     auto edge = sortedEdges.top(); sortedEdges.pop();
-    if (uf.unionSets(get<0>(edge), get<1>(edge))) {
+    if (uf.unionSets(edge->getFrom(), edge->getTo())) {
       mst.push_back(edge);
     }
   }

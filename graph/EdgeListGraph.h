@@ -10,11 +10,11 @@ namespace graph {
     public:
       void initializeFromInput(std::istream& input) override;
 
-      [[nodiscard]] const std::vector<int>& getAdjacentNodes(int node) override;
-      std::vector<edge_t> getEdges() override;
-      double getWeight(int u, int v) override;
+    [[nodiscard]] std::vector<std::shared_ptr<const edge::SuperEdge>> getAdjacent(int node) override;
+    std::vector<std::shared_ptr<const edge::SuperEdge>> getEdges() override;
+    std::shared_ptr<const edge::SuperEdge> getEdge(int u, int v) override;
     private:
-      std::vector<edge_t> edgeList;
+      std::vector<std::shared_ptr<const edge::SuperEdge>> edgeList;
   };
 }
 

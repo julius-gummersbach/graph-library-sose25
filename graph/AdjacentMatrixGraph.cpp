@@ -5,6 +5,8 @@
 #include <cfloat>
 #include <iostream>
 
+#include "../edge/SingleWeightedEdge.h"
+
 namespace graph {
 
   void AdjacentMatrixGraph::initializeFromInput(std::istream &input) {
@@ -15,10 +17,11 @@ namespace graph {
     std::getline(input, line);
     std::istringstream ls(line);
     ls >> numNodes;
-    adjacencyMatrix = new double[numNodes * numNodes];
+    adjacencyMatrix = std::vector<std::shared_ptr<const edge::SuperEdge>>();
+    adjacencyMatrix.resize(numNodes * numNodes);
     for (int i = 0; i < numNodes; i++) {
       for (int j = 0; j < numNodes; j++) {
-        adjacencyMatrix[i * numNodes + j] = INFINITY;
+        adjacencyMatrix[i * numNodes + j] = nullptr;
       }
     }
 
@@ -35,49 +38,47 @@ namespace graph {
       if (line.empty()) continue;
       ls = std::istringstream(line);
       ls >> u >> v;
-      double weight = 1;
-      if (weighted) {
-        ls >> weight;
+
+      int index;
+      if (!directed && v < u) {
+        index = v * numNodes + u;
+      } else {
+        index = u * numNodes + v;
       }
 
-      if (!directed && v < u) {
-        adjacencyMatrix[v * numNodes + u] = weight;
+      if (weighted) {
+        ls >> w;
+        adjacencyMatrix[index] = std::make_shared<const edge::SingleWeightedEdge>(u, v, w);
       } else {
-        adjacencyMatrix[u * numNodes + v] = weight;
+        adjacencyMatrix[index] = std::make_shared<const edge::SuperEdge>(u,v);
       }
     } while (std::getline(input, line));
     initialized = true;
   }
 
-  const std::vector<int>& AdjacentMatrixGraph::getAdjacentNodes(int node) {
+  std::vector<std::shared_ptr<const edge::SuperEdge>> AdjacentMatrixGraph::getAdjacent(const int node) {
     if (adjacencyCache.contains(node)) {
       return adjacencyCache.at(node);
     }
-    std::vector<int> adjacentNodes;
+    std::vector<std::shared_ptr<const edge::SuperEdge>> adjacent;
     for (int i = 0; i < numNodes; i++) {
-      if (!directed) {
-        if (i < node) {
-          if (adjacencyMatrix[i * numNodes + node] != INFINITY) {
-            adjacentNodes.push_back(i);
-          }
-        } else {
-          if (adjacencyMatrix[node * numNodes + i] != INFINITY) {
-            adjacentNodes.push_back(i);
-          }
-        }
-      } else if (adjacencyMatrix[node * numNodes + i] != INFINITY) {
-        adjacentNodes.push_back(i);
+      int index;
+      if (!directed && i < node) {
+        index = i * numNodes + node;
+      } else {
+        index = node * numNodes + i;
       }
+      if (adjacencyMatrix[index] != nullptr) adjacent.push_back(adjacencyMatrix[index]);
     }
-    adjacencyCache[node] = adjacentNodes;
-    return adjacencyCache[node];
+    adjacencyCache[node] = adjacent;
+    return adjacent;
   }
 
-  std::vector<SuperGraph::edge_t> AdjacentMatrixGraph::getEdges() {
+  std::vector<std::shared_ptr<const edge::SuperEdge>> AdjacentMatrixGraph::getEdges() {
     throw std::runtime_error("Not implemented yet.");
   }
 
-  double AdjacentMatrixGraph::getWeight(const int u, const int v) {
+  std::shared_ptr<const edge::SuperEdge> AdjacentMatrixGraph::getEdge(const int u, const int v) {
     if (!directed && v < u) return adjacencyMatrix[v * numNodes + u];
     return adjacencyMatrix[u * numNodes + v];
   }

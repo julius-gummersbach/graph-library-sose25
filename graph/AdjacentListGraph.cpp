@@ -3,31 +3,24 @@
 #include <iostream>
 #include <sstream>
 
+#include "../edge/SingleWeightedEdge.h"
+
 namespace graph {
   using namespace std;
 
   AdjacentListGraph::AdjacentListGraph() = default;
 
-  AdjacentListGraph::AdjacentListGraph(const vector<edge_t>& mstEdgeList) {
+  AdjacentListGraph::AdjacentListGraph(const vector<std::shared_ptr<edge::SuperEdge>>& mstEdgeList) {
     numNodes = mstEdgeList.size() + 1;
     adjacencyList.resize(numNodes);
-    weights.resize(numNodes);
-    for (auto list : adjacencyList) {
-      list.resize(15);
-    }
-    for (int i = 0; i < numNodes; ++i) {
-      adjacencyList[i].reserve(15);
-      weights[i].reserve(15);
-    }
-    for (auto edge : mstEdgeList) {
-      adjacencyList[get<0>(edge)].push_back(get<1>(edge));
-      adjacencyList[get<1>(edge)].push_back(get<0>(edge));
-      weights[get<0>(edge)].push_back(get<2>(edge));
-      weights[get<1>(edge)].push_back(get<2>(edge));
+    for (const auto& edge : mstEdgeList) {
+      adjacencyList[edge->getFrom()][edge->getTo()] = edge;
+      if (!directed) {
+        adjacencyList[edge->getTo()][edge->getFrom()] = edge;
+      }
     }
     initialized = true;
   }
-
 
   void AdjacentListGraph::initializeFromInput(istream &input) {
     std::ios::sync_with_stdio(false);
@@ -39,11 +32,6 @@ namespace graph {
     ls >> numNodes;
 
     adjacencyList.resize(numNodes);
-    weights.resize(numNodes);
-    for (int i = 0; i < numNodes; ++i) {
-      adjacencyList[i].reserve(15);
-      weights[i].reserve(15);
-    }
 
     std::getline(input, line);
     ls = std::istringstream(line);
@@ -58,22 +46,33 @@ namespace graph {
       if (line.empty()) continue;
       ls = std::istringstream(line);
       ls >> u >> v;
-      adjacencyList[u].push_back(v);
-      if (!directed && u != v) adjacencyList[v].push_back(u);
       if (weighted) {
         ls >> w;
-        weights[u].push_back(w);
-        if (!directed && u != v) weights[v].push_back(w);
+        adjacencyList[u][v] = std::make_shared<const edge::SingleWeightedEdge>(u,v, w);
+        if (!directed) {
+          adjacencyList[v][u] = std::make_shared<const edge::SingleWeightedEdge>(v,u, w);
+        }
+      } else {
+        adjacencyList[u][v] = std::make_shared<const edge::SuperEdge>(u,v);
+        if (!directed) {
+          adjacencyList[v][u] = std::make_shared<const edge::SuperEdge>(v,u);
+        }
       }
     } while (std::getline(input, line));
     initialized = true;
   }
 
-  const vector<int> & AdjacentListGraph::getAdjacentNodes(int node) {
-    return adjacencyList[node];
+
+  std::vector<std::shared_ptr<const edge::SuperEdge>> AdjacentListGraph::getAdjacent(const int node) {
+    vector<std::shared_ptr<const edge::SuperEdge>> result;
+    result.reserve(adjacencyList[node].size());
+    for (const auto& edge : adjacencyList[node]) {
+      result.push_back(edge.second);
+    }
+    return result;
   }
 
-  std::vector<SuperGraph::edge_t> AdjacentListGraph::getEdges() {
+  std::vector<std::shared_ptr<const edge::SuperEdge>> AdjacentListGraph::getEdges() {
     throw runtime_error("Not implemented yet.");
     /* implemented, but not tested yet
     std::vector<std::array<int, 2>> edges;
@@ -85,15 +84,7 @@ namespace graph {
     return edges;*/
   }
 
-  double AdjacentListGraph::getWeight(const int u, const int v) {
-    if (!weighted) {
-      throw runtime_error("Graph is not weighted.");
-    }
-    for (int i = 0; i < adjacencyList[u].size(); i++) {
-      if (adjacencyList[u][i] == v) {
-        return weights[u][i];
-      }
-    }
-    throw runtime_error("Edge not found.");
+  std::shared_ptr<const edge::SuperEdge> AdjacentListGraph::getEdge(const int u, const int v) {
+    return adjacencyList[u][v];
   }
 }

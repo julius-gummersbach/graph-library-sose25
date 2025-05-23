@@ -3,12 +3,13 @@
 #include <vector>
 #include <fstream>
 
+#include "../edge/SuperEdge.h"
+
 namespace graph {
   class SuperGraph {
   public:
     explicit SuperGraph() = default;
     virtual ~SuperGraph();
-    typedef std::tuple<int, int, double> edge_t;
 
     int numNodes = 0;
     bool directed = false;
@@ -16,10 +17,10 @@ namespace graph {
     bool initialized = false;
 
     virtual void initializeFromInput(std::istream& input) = 0;
-    [[nodiscard]] const virtual std::vector<int>& getAdjacentNodes(int node) = 0;
+    [[nodiscard]] virtual std::vector<std::shared_ptr<const edge::SuperEdge>> getAdjacent(int node) = 0;
 
-    virtual std::vector<edge_t> getEdges() = 0;
-    virtual double getWeight(int u, int v) = 0;
+    virtual std::vector<std::shared_ptr<const edge::SuperEdge>> getEdges() = 0;
+    virtual std::shared_ptr<const edge::SuperEdge> getEdge(int u, int v) = 0;
   };
 }
 

@@ -9,12 +9,12 @@ namespace graph {
   class AdjacentMatrixGraph : public SuperGraph {
   public:
     void initializeFromInput(std::istream& input) override;
-    [[nodiscard]] const std::vector<int>& getAdjacentNodes(int node) override;
-    std::vector<edge_t> getEdges() override;
-    double getWeight(int u, int v) override;
+    [[nodiscard]] std::vector<std::shared_ptr<const edge::SuperEdge>> getAdjacent(int node) override;
+    std::vector<std::shared_ptr<const edge::SuperEdge>> getEdges() override;
+    std::shared_ptr<const edge::SuperEdge> getEdge(int u, int v) override;
   private:
-    double* adjacencyMatrix;
-    std::map<int, std::vector<int>> adjacencyCache;
+    std::vector<std::shared_ptr<const edge::SuperEdge>> adjacencyMatrix;
+    std::map<int, std::vector<std::shared_ptr<const edge::SuperEdge>>> adjacencyCache;
   };
 }
 

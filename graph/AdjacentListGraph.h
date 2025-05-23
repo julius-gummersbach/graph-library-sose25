@@ -1,6 +1,8 @@
 #ifndef ADJACENTLISTGRAPH_H
 #define ADJACENTLISTGRAPH_H
 
+#include <map>
+
 #include "SuperGraph.h"
 
 namespace graph {
@@ -10,15 +12,14 @@ namespace graph {
       /**
        * @param mstEdgeList must be an edge list of an MST
        */
-      explicit AdjacentListGraph(const std::vector<edge_t>& mstEdgeList);
-
+      explicit AdjacentListGraph(const std::vector<std::shared_ptr<edge::SuperEdge>>& mstEdgeList);
       void initializeFromInput(std::istream& input) override;
-      [[nodiscard]] const std::vector<int>& getAdjacentNodes(int node) override;
-      std::vector<edge_t> getEdges() override;
-      double getWeight(int u, int v) override;
+
+      [[nodiscard]] std::vector<std::shared_ptr<const edge::SuperEdge>> getAdjacent(int node) override;
+      std::vector<std::shared_ptr<const edge::SuperEdge>> getEdges() override;
+      std::shared_ptr<const edge::SuperEdge> getEdge(int u, int v) override;
     private:
-      std::vector<std::vector<int>> adjacencyList;
-      std::vector<std::vector<double>> weights;
+      std::vector<std::map<int, std::shared_ptr<const edge::SuperEdge>>> adjacencyList;
   };
 }
 

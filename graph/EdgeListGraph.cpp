@@ -1,33 +1,35 @@
 #include "EdgeListGraph.h"
 
+#include "../edge/SingleWeightedEdge.h"
+
 namespace graph {
 
   /*
    * currently only supports weighted graphs
    */
   void EdgeListGraph::initializeFromInput(std::istream& input) {
+    weighted = true;
     input >> numNodes;
-    int a, b;
-    double weight;
-    while (input >> a >> b >> weight) {
-      auto edge = std::tuple{a, b, weight};
-      edgeList.push_back(edge);
+    int u, v;
+    double w;
+    while (input >> u >> v >> w) {
+      edgeList.push_back(std::make_shared<const edge::SingleWeightedEdge>(u, v, w));
     }
     initialized = true;
   }
 
-  std::vector<EdgeListGraph::edge_t> EdgeListGraph::getEdges() {
+  std::vector<std::shared_ptr<const edge::SuperEdge>> EdgeListGraph::getEdges() {
     if (!initialized) {
       throw std::runtime_error("Graph not initialized.");
     }
     return edgeList;
   }
 
-  double EdgeListGraph::getWeight(int u, int v) {
+  std::vector<std::shared_ptr<const edge::SuperEdge>> EdgeListGraph::getAdjacent(int node) {
     throw std::runtime_error("Not implemented yet.");
   }
 
-  const std::vector<int>& EdgeListGraph::getAdjacentNodes(int node) {
+  std::shared_ptr<const edge::SuperEdge> EdgeListGraph::getEdge(int u, int v) {
     throw std::runtime_error("Not implemented yet.");
   }
 }

@@ -18,9 +18,10 @@ vector<int> depthFirstSearch(graph::SuperGraph &graph, const int startNode, vect
     stack.pop();
     subGraph.push_back(currentNode);
     visited[currentNode] = true;
-    for (const vector<int> &adjacent = graph.getAdjacentNodes(currentNode); int node: adjacent) {
-      if (visited[node]) continue;
-      stack.push(node);
+    const auto adjacent = graph.getAdjacent(currentNode);
+    for (const auto& edge: adjacent) {
+      if (visited[edge->getTo()]) continue;
+      stack.push(edge->getTo());
     }
   }
   return subGraph;
