@@ -15,6 +15,5 @@ add_executable(graph-library-gummersbach
         helper/UnionFind.cpp
         helper/UnionFind.h
         edge/SuperEdge.h
-        edge/SingleWeightedEdge.h
         edge/WeightedEdge.h
 )

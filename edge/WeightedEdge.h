@@ -8,15 +8,16 @@
 namespace edge {
   class WeightedEdge : public SuperEdge {
   public:
-    WeightedEdge(const int from, const int to) : SuperEdge(from, to) {}
+    WeightedEdge(const int from, const int to, const double weight) : SuperEdge(from, to), weight(weight) {}
     ~WeightedEdge() override = default;
 
+    [[nodiscard]] double getWeight() const { return weight; }
+
     virtual bool operator<(const WeightedEdge& other) const {
-      throw std::runtime_error(
-          "operator< not implemented for this subclass of WeightedEdge: " +
-          std::string(typeid(*this).name())
-      );
+      return this->weight < other.weight;
     }
+  private:
+    double weight;
   };
 }
 

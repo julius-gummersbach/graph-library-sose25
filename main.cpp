@@ -15,7 +15,6 @@
 #include "0x03.cpp"
 
 using namespace std;
-using edge_t = graph::SuperGraph::edge_t;
 
 const string INPUT_DIR = "../input/";
 
@@ -164,8 +163,8 @@ void assertFunctionOnGraph(const string& inputFile, graph::SuperGraph* graph, do
 double evaluatePrim(graph::SuperGraph &graph) {
   const auto mst = getMSTPrim(graph);
   double weight = 0;
-  for (const auto edge: mst) {
-    weight += get<2>(edge);
+  for (const auto& edge: mst) {
+    weight += edge->getWeight();
   }
   return weight;
 }
@@ -177,7 +176,7 @@ double evaluateKruskal(graph::SuperGraph &graph) {
   const auto mst = getMSTKruskal(graph);
   double weight = 0;
   for (const auto edge: mst) {
-    weight += get<2>(edge);
+    weight += edge->getWeight();
   }
   return weight;
 }
@@ -187,18 +186,18 @@ double evaluateKruskal(graph::SuperGraph &graph) {
  * @param circle an edge list
  * @return 1 if circle is a hamilton circle, 0 otherwise
  */
-double printAndCheckHamilton(vector<edge_t> circle) {
-  const int startNode = get<0>(circle[0]);
+double printAndCheckHamilton(vector<shared_ptr<const edge::WeightedEdge>> circle) {
+  const int startNode = circle[0]->getFrom();
   double weight = 0;
   int current = startNode;
   cout << "Hamiltonian evaluation: ";
   for (const auto edge: circle) {
-    if (get<0>(edge) != current) return 0;
-    cout << get<0>(edge) << "-";
-    weight += get<2>(edge);
-    current = get<1>(edge);
+    if (edge->getFrom() != current) return 0;
+    cout << edge->getFrom() << "-";
+    weight += edge->getWeight();
+    current = edge->getTo();
   }
-  if (get<1>(circle.at(circle.size()-1)) != startNode) return 0;
+  if (circle.at(circle.size()-1)->getTo() != startNode) return 0;
   cout << startNode << endl;
   cout << "Weight: " << weight << endl;
   return 1;

@@ -3,14 +3,18 @@
 #include <iostream>
 #include <sstream>
 
-#include "../edge/SingleWeightedEdge.h"
+#include "../edge/WeightedEdge.h"
+
+namespace edge {
+  class WeightedEdge;
+}
 
 namespace graph {
   using namespace std;
 
   AdjacentListGraph::AdjacentListGraph() = default;
 
-  AdjacentListGraph::AdjacentListGraph(const vector<std::shared_ptr<edge::SuperEdge>>& mstEdgeList) {
+  AdjacentListGraph::AdjacentListGraph(const vector<shared_ptr<const edge::WeightedEdge>>& mstEdgeList) {
     numNodes = mstEdgeList.size() + 1;
     adjacencyList.resize(numNodes);
     for (const auto& edge : mstEdgeList) {
@@ -48,9 +52,9 @@ namespace graph {
       ls >> u >> v;
       if (weighted) {
         ls >> w;
-        adjacencyList[u][v] = std::make_shared<const edge::SingleWeightedEdge>(u,v, w);
+        adjacencyList[u][v] = std::make_shared<const edge::WeightedEdge>(u,v, w);
         if (!directed) {
-          adjacencyList[v][u] = std::make_shared<const edge::SingleWeightedEdge>(v,u, w);
+          adjacencyList[v][u] = std::make_shared<const edge::WeightedEdge>(v,u, w);
         }
       } else {
         adjacencyList[u][v] = std::make_shared<const edge::SuperEdge>(u,v);

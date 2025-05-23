@@ -2,10 +2,9 @@
 #include <sstream>
 #include "AdjacentMatrixGraph.h"
 
-#include <cfloat>
 #include <iostream>
 
-#include "../edge/SingleWeightedEdge.h"
+#include "../edge/WeightedEdge.h"
 
 namespace graph {
 
@@ -48,7 +47,7 @@ namespace graph {
 
       if (weighted) {
         ls >> w;
-        adjacencyMatrix[index] = std::make_shared<const edge::SingleWeightedEdge>(u, v, w);
+        adjacencyMatrix[index] = std::make_shared<const edge::WeightedEdge>(u, v, w);
       } else {
         adjacencyMatrix[index] = std::make_shared<const edge::SuperEdge>(u,v);
       }

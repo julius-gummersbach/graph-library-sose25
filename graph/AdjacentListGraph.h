@@ -4,6 +4,7 @@
 #include <map>
 
 #include "SuperGraph.h"
+#include "../edge/WeightedEdge.h"
 
 namespace graph {
   class AdjacentListGraph : public SuperGraph {
@@ -12,7 +13,7 @@ namespace graph {
       /**
        * @param mstEdgeList must be an edge list of an MST
        */
-      explicit AdjacentListGraph(const std::vector<std::shared_ptr<edge::SuperEdge>>& mstEdgeList);
+      explicit AdjacentListGraph(const std::vector<std::shared_ptr<const edge::WeightedEdge>>& mstEdgeList);
       void initializeFromInput(std::istream& input) override;
 
       [[nodiscard]] std::vector<std::shared_ptr<const edge::SuperEdge>> getAdjacent(int node) override;

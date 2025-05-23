@@ -1,6 +1,6 @@
 #include "EdgeListGraph.h"
 
-#include "../edge/SingleWeightedEdge.h"
+#include "../edge/WeightedEdge.h"
 
 namespace graph {
 
@@ -13,7 +13,7 @@ namespace graph {
     int u, v;
     double w;
     while (input >> u >> v >> w) {
-      edgeList.push_back(std::make_shared<const edge::SingleWeightedEdge>(u, v, w));
+      edgeList.push_back(std::make_shared<const edge::WeightedEdge>(u, v, w));
     }
     initialized = true;
   }

@@ -11,20 +11,20 @@ using namespace std;
  * @graph a weighted graph
  * @return edge list of the MST
  */
-vector<std::shared_ptr<const edge::WeightedEdge>> getMSTPrim(graph::SuperGraph &graph) {
+vector<shared_ptr<const edge::WeightedEdge>> getMSTPrim(graph::SuperGraph &graph) {
   if (!graph.weighted) {
     throw std::invalid_argument("Graph is not weighted");
   }
   struct CompareEdgePtrs {
-    bool operator()(const std::shared_ptr<const edge::WeightedEdge>& a,
-                    const std::shared_ptr<const edge::WeightedEdge>& b) const {
+    bool operator()(const shared_ptr<const edge::WeightedEdge>& a,
+                    const shared_ptr<const edge::WeightedEdge>& b) const {
       return *a < *b;
     }
   };
 
   std::priority_queue<
-      std::shared_ptr<const edge::WeightedEdge>,
-      std::vector<std::shared_ptr<const edge::WeightedEdge>>,
+      shared_ptr<const edge::WeightedEdge>,
+      std::vector<shared_ptr<const edge::WeightedEdge>>,
       CompareEdgePtrs
   > frontier;
 
@@ -32,7 +32,7 @@ vector<std::shared_ptr<const edge::WeightedEdge>> getMSTPrim(graph::SuperGraph &
     frontier.push(std::dynamic_pointer_cast<const edge::WeightedEdge>(edge));
   }
 
-  vector<std::shared_ptr<const edge::WeightedEdge>> mst;
+  vector<shared_ptr<const edge::WeightedEdge>> mst;
   vector found(graph.numNodes, false);
   found[0] = true;
   while (mst.size() < graph.numNodes - 1) {
@@ -54,20 +54,20 @@ vector<std::shared_ptr<const edge::WeightedEdge>> getMSTPrim(graph::SuperGraph &
  * Performs Kruskal algorithm
  * @return edge list of the MST
  */
-vector<std::shared_ptr<const edge::WeightedEdge>> getMSTKruskal(graph::SuperGraph &graph) {
+vector<shared_ptr<const edge::WeightedEdge>> getMSTKruskal(graph::SuperGraph &graph) {
   if (!graph.weighted) {
     throw std::invalid_argument("Graph is not weighted");
   }
   struct CompareEdgePtrs {
-    bool operator()(const std::shared_ptr<const edge::WeightedEdge>& a,
-                    const std::shared_ptr<const edge::WeightedEdge>& b) const {
+    bool operator()(const shared_ptr<const edge::WeightedEdge>& a,
+                    const shared_ptr<const edge::WeightedEdge>& b) const {
       return *a < *b;
     }
   };
 
   std::priority_queue<
-      std::shared_ptr<const edge::WeightedEdge>,
-      std::vector<std::shared_ptr<const edge::WeightedEdge>>,
+      shared_ptr<const edge::WeightedEdge>,
+      std::vector<shared_ptr<const edge::WeightedEdge>>,
       CompareEdgePtrs
   > sortedEdges;
 
@@ -76,7 +76,7 @@ vector<std::shared_ptr<const edge::WeightedEdge>> getMSTKruskal(graph::SuperGrap
     sortedEdges.push(std::dynamic_pointer_cast<const edge::WeightedEdge>(edge));
   }
 
-  vector<std::shared_ptr<const edge::WeightedEdge>> mst;
+  vector<shared_ptr<const edge::WeightedEdge>> mst;
   helper::UnionFind uf(graph.numNodes);
   while (mst.size() < graph.numNodes - 1) {
     if (sortedEdges.empty()) {
