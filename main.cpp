@@ -28,6 +28,8 @@ double evaluateTspBruteForce(graph::SuperGraph &graph);
 double evaluateTspBnB(graph::SuperGraph &graph);
 double evaluateDijkstra2to0(graph::SuperGraph &graph);
 double evaluateDijkstra0to1(graph::SuperGraph &graph);
+double evaluateMooreBellmanFord2to0(graph::SuperGraph &graph);
+double evaluateMooreBellmanFord0to1(graph::SuperGraph &graph);
 
 
 int main() {
@@ -124,6 +126,20 @@ int main() {
   assertFunctionOnGraph(INPUT_DIR + "0x04/Wege1.txt", new graph::AdjacentListGraph(), evaluateDijkstra2to0, 6, true);
   assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::AdjacentListGraph(), evaluateDijkstra0to1, 5.56283, true);
   assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::AdjacentListGraph(), evaluateDijkstra0to1, 2.36802, false);
+
+  // 0x04, Shortest Paths Moore-Bellman-Ford
+  cout << "############################################" << endl;
+  cout << "############################################" << endl;
+  cout << "0x04, Shortest Paths Moore-Bellman-Ford" << endl;
+  assertFunctionOnGraph(INPUT_DIR + "0x04/Wege1.txt", new graph::EdgeListGraph(), evaluateMooreBellmanFord2to0, 6, true);
+  assertFunctionOnGraph(INPUT_DIR + "0x04/Wege2.txt", new graph::EdgeListGraph(), evaluateMooreBellmanFord2to0, 2, true);
+  try {
+    assertFunctionOnGraph(INPUT_DIR + "0x04/Wege3.txt", new graph::EdgeListGraph(), evaluateMooreBellmanFord2to0, NAN, true);
+  } catch (const std::invalid_argument& e) {
+    cout << "Negative Cycle detected successfully: " << e.what() << endl << endl << endl;
+  }
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::EdgeListGraph(), evaluateMooreBellmanFord0to1, 5.56283, true);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::EdgeListGraph(), evaluateMooreBellmanFord0to1, 2.36802, false);
 
   return 0;
 }
@@ -282,7 +298,7 @@ double evaluateDijkstra(graph::SuperGraph &graph, const int from, const int to) 
   for (int i = 0; i < shortestPaths.size(); i++) {
     if (i == from) continue;
     cout << "Path from " << from << " to " << i << ": ";
-    auto weight = checkAndPrintPath(shortestPaths[i]);
+    const auto weight = checkAndPrintPath(shortestPaths[i]);
     if (i == to) weightFromTo = weight;
   }
   return weightFromTo;
@@ -300,4 +316,34 @@ double evaluateDijkstra2to0(graph::SuperGraph &graph) {
  */
 double evaluateDijkstra0to1(graph::SuperGraph &graph) {
   return evaluateDijkstra(graph, 0, 1);
+}
+
+
+/**
+ * @return weight of the shortest path from "from" to "to"
+ */
+double evaluateMooreBellmanFord(graph::SuperGraph &graph, const int from, const int to) {
+  double weightFromTo = NAN;
+  auto shortestPaths = mooreBellmanFord(graph, from);
+  for (int i = 0; i < shortestPaths.size(); i++) {
+    if (i == from) continue;
+    cout << "Path from " << from << " to " << i << ": ";
+    const auto weight = checkAndPrintPath(shortestPaths[i]);
+    if (i == to) weightFromTo = weight;
+  }
+  return weightFromTo;
+}
+
+/**
+ * @return weight of the shortest path from 2 to 0
+ */
+double evaluateMooreBellmanFord2to0(graph::SuperGraph &graph) {
+  return evaluateMooreBellmanFord(graph, 2, 0);
+}
+
+/**
+ * @return weight of the shortest path from 0 to 1
+ */
+double evaluateMooreBellmanFord0to1(graph::SuperGraph &graph) {
+  return evaluateMooreBellmanFord(graph, 0, 1);
 }
