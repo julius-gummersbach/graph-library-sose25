@@ -18,7 +18,7 @@ using namespace std;
 
 const string INPUT_DIR = "../input/";
 
-void assertFunctionOnGraph(const string& inputFile, graph::SuperGraph* graph, double function(graph::SuperGraph&), double expectedResult);
+void assertFunctionOnGraph(const string& inputFile, graph::SuperGraph* graph, double function(graph::SuperGraph&), double expectedResult, bool directed = false);
 double evaluatePrim(graph::SuperGraph &graph);
 double evaluateKruskal(graph::SuperGraph &graph);
 double evaluateNearestNeighbor(graph::SuperGraph &graph);
@@ -123,8 +123,9 @@ int main() {
  * @param graph graph object to use for calculation
  * @param function a function that runs on a graph object and returns a double
  * @param expectedResult expected result of function if run on graph
+ * @param directed if the graph should be read as directed
  */
-void assertFunctionOnGraph(const string& inputFile, graph::SuperGraph* graph, double function(graph::SuperGraph&), double expectedResult) {
+void assertFunctionOnGraph(const string& inputFile, graph::SuperGraph* graph, double function(graph::SuperGraph&), const double expectedResult, const bool directed) {
   cout << "Reading from file " << inputFile << endl;
   auto start = chrono::high_resolution_clock::now();
   ifstream file(inputFile);
@@ -136,6 +137,7 @@ void assertFunctionOnGraph(const string& inputFile, graph::SuperGraph* graph, do
   ostringstream buffer;
   buffer << file.rdbuf();
   istringstream input(buffer.str());
+  graph->directed = directed;
   graph->initializeFromInput(input);
   
   cout << "Starting calculation..." << endl;
@@ -184,20 +186,26 @@ double evaluateKruskal(graph::SuperGraph &graph) {
 /**
  * checks, if the given edge list is a hamilton-circle and prints it and its weight to std::cout
  * @param circle an edge list
+ * @param directed whether the check should assume a directed graph
  * @return 1 if circle is a hamilton circle, 0 otherwise
  */
-double printAndCheckHamilton(vector<shared_ptr<const edge::WeightedEdge>> circle) {
+double printAndCheckHamilton(const vector<shared_ptr<const edge::WeightedEdge>> &circle, const bool directed) {
   const int startNode = circle[0]->getFrom();
   double weight = 0;
   int current = startNode;
   cout << "Hamiltonian evaluation: ";
-  for (const auto edge: circle) {
-    if (edge->getFrom() != current) return 0;
-    cout << edge->getFrom() << "-";
+  for (const auto& edge: circle) {
+    if (edge->getFrom() != current && (directed || edge->getTo() != current)) return 0;
+    int from = edge->getFrom();
+    int to = edge->getTo();
+    if (!directed && edge->getTo() == current) {
+      swap(from, to);
+    }
+    cout << from << "-";
     weight += edge->getWeight();
-    current = edge->getTo();
+    current = to;
   }
-  if (circle.at(circle.size()-1)->getTo() != startNode) return 0;
+  if (circle.at(circle.size()-1)->getTo() != startNode && (directed || circle.at(circle.size()-1)->getFrom() != startNode)) return 0;
   cout << startNode << endl;
   cout << "Weight: " << weight << endl;
   return 1;
@@ -209,7 +217,7 @@ double printAndCheckHamilton(vector<shared_ptr<const edge::WeightedEdge>> circle
 double evaluateNearestNeighbor(graph::SuperGraph &graph) {
   const auto hamilton = nearestNeighbors(graph, 0);
   if (hamilton.size() != graph.numNodes) return 0;
-  return printAndCheckHamilton(hamilton);
+  return printAndCheckHamilton(hamilton, graph.directed);
 }
 
 /**
@@ -218,7 +226,7 @@ double evaluateNearestNeighbor(graph::SuperGraph &graph) {
 double evaluateDoubleTree(graph::SuperGraph &graph) {
   const auto hamilton = doubleTreeAlgorthm(graph);
   if (hamilton.size() != graph.numNodes) return 0;
-  return printAndCheckHamilton(hamilton);
+  return printAndCheckHamilton(hamilton, graph.directed);
 }
 
 /**
@@ -228,7 +236,7 @@ double evaluateTspBruteForce(graph::SuperGraph &graph) {
   if (graph.numNodes > 20) cout << "This is a bad idea...";
   auto shortestHamilton = bruteForceTsp(graph, false);
   if (shortestHamilton.size() != graph.numNodes) return 0;
-  return printAndCheckHamilton(shortestHamilton);
+  return printAndCheckHamilton(shortestHamilton, graph.directed);
 }
 
 /**
@@ -237,5 +245,5 @@ double evaluateTspBruteForce(graph::SuperGraph &graph) {
 double evaluateTspBnB(graph::SuperGraph &graph) {
   auto shortestHamilton = bruteForceTsp(graph, true);
   if (shortestHamilton.size() != graph.numNodes) return 0;
-  return printAndCheckHamilton(shortestHamilton);
+  return printAndCheckHamilton(shortestHamilton, graph.directed);
 }

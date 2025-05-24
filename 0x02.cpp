@@ -18,7 +18,7 @@ vector<shared_ptr<const edge::WeightedEdge>> getMSTPrim(graph::SuperGraph &graph
   struct CompareEdgePtrs {
     bool operator()(const shared_ptr<const edge::WeightedEdge>& a,
                     const shared_ptr<const edge::WeightedEdge>& b) const {
-      return *a < *b;
+      return !(*a < *b);
     }
   };
 
@@ -37,12 +37,11 @@ vector<shared_ptr<const edge::WeightedEdge>> getMSTPrim(graph::SuperGraph &graph
   found[0] = true;
   while (mst.size() < graph.numNodes - 1) {
     auto cheapestOutgoingEdge = frontier.top(); frontier.pop();
-    int v = cheapestOutgoingEdge->getTo();
-    if (!found[v]) {
-      found[v] = true;
+    int outNode = !graph.directed && found[cheapestOutgoingEdge->getTo()] ? cheapestOutgoingEdge->getFrom() : cheapestOutgoingEdge->getTo();
+    if (!found[outNode]) {
+      found[outNode] = true;
       mst.push_back(cheapestOutgoingEdge);
-      for (const auto& adjacentEdge: graph.getAdjacent(v)) {
-        if (found[adjacentEdge->getTo()]) continue;
+      for (const auto& adjacentEdge: graph.getAdjacent(outNode)) {
         frontier.push(std::dynamic_pointer_cast<const edge::WeightedEdge>(adjacentEdge));
       }
     }
@@ -61,7 +60,7 @@ vector<shared_ptr<const edge::WeightedEdge>> getMSTKruskal(graph::SuperGraph &gr
   struct CompareEdgePtrs {
     bool operator()(const shared_ptr<const edge::WeightedEdge>& a,
                     const shared_ptr<const edge::WeightedEdge>& b) const {
-      return *a < *b;
+      return !(*a < *b);
     }
   };
 
