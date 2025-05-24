@@ -33,6 +33,7 @@ vector<shared_ptr<const edge::WeightedEdge>> getMSTPrim(graph::SuperGraph &graph
   }
 
   vector<shared_ptr<const edge::WeightedEdge>> mst;
+  mst.reserve(graph.numNodes - 1);
   vector found(graph.numNodes, false);
   found[0] = true;
   while (mst.size() < graph.numNodes - 1) {
@@ -76,6 +77,7 @@ vector<shared_ptr<const edge::WeightedEdge>> getMSTKruskal(graph::SuperGraph &gr
   }
 
   vector<shared_ptr<const edge::WeightedEdge>> mst;
+  mst.reserve(graph.numNodes - 1);
   helper::UnionFind uf(graph.numNodes);
   while (mst.size() < graph.numNodes - 1) {
     if (sortedEdges.empty()) {

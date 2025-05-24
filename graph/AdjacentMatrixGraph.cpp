@@ -60,6 +60,7 @@ namespace graph {
       return adjacencyCache.at(node);
     }
     std::vector<std::shared_ptr<const edge::SuperEdge>> adjacent;
+    adjacent.reserve(numNodes);
     for (int i = 0; i < numNodes; i++) {
       int index;
       if (!directed && i < node) {

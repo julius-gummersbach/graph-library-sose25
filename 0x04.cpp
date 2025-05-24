@@ -69,6 +69,7 @@ vector<vector<shared_ptr<const edge::WeightedEdge>>> mooreBellmanFord(graph::Sup
 
   if (!graph.directed) {
     const auto edgeListCopy = edgeList;
+    edgeList.reserve(edgeList.size() * 2);
     for (const auto& edge : edgeListCopy) {
       edgeList.push_back(make_shared<edge::WeightedEdge>(edge->getTo(), edge->getFrom(), dynamic_pointer_cast<const edge::WeightedEdge>(edge)->getWeight()));
     }
