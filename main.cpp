@@ -13,6 +13,7 @@
 #include "0x01.cpp"
 #include "0x02.cpp"
 #include "0x03.cpp"
+#include "0x04.cpp"
 
 using namespace std;
 
@@ -25,6 +26,8 @@ double evaluateNearestNeighbor(graph::SuperGraph &graph);
 double evaluateDoubleTree(graph::SuperGraph &graph);
 double evaluateTspBruteForce(graph::SuperGraph &graph);
 double evaluateTspBnB(graph::SuperGraph &graph);
+double evaluateDijkstra2to0(graph::SuperGraph &graph);
+double evaluateDijkstra0to1(graph::SuperGraph &graph);
 
 
 int main() {
@@ -113,6 +116,14 @@ int main() {
   /* these would be expected to take roughly 30min
   assertFunctionOnGraph(INPUT_DIR + "0x03/K_15.txt", new graph::AdjacentMatrixGraph(), evaluateTspBruteForce, 1);
   assertFunctionOnGraph(INPUT_DIR + "0x03/K_15e.txt", new graph::AdjacentMatrixGraph(), evaluateTspBruteForce, 1); */
+
+  // 0x04, Shortest Paths Dijkstra
+  cout << "############################################" << endl;
+  cout << "############################################" << endl;
+  cout << "0x04, Shortest Paths Dijkstra" << endl;
+  assertFunctionOnGraph(INPUT_DIR + "0x04/Wege1.txt", new graph::AdjacentListGraph(), evaluateDijkstra2to0, 6, true);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::AdjacentListGraph(), evaluateDijkstra0to1, 5.56283, true);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::AdjacentListGraph(), evaluateDijkstra0to1, 2.36802, false);
 
   return 0;
 }
@@ -246,4 +257,47 @@ double evaluateTspBnB(graph::SuperGraph &graph) {
   auto shortestHamilton = bruteForceTsp(graph, true);
   if (shortestHamilton.size() != graph.numNodes) return 0;
   return printAndCheckHamilton(shortestHamilton, graph.directed);
+}
+
+double checkAndPrintPath(const vector<shared_ptr<const edge::WeightedEdge>> &path) {
+  int currentNode = path[0]->getFrom();
+  double weight = 0;
+  cout << currentNode;
+  for (const auto& edge: path) {
+    if (edge->getFrom() != currentNode) return false;
+    currentNode = edge->getTo();
+    weight += edge->getWeight();
+    cout << "-" << currentNode;
+  }
+  cout << ". Weight: " << weight << endl;
+  return weight;
+}
+
+/**
+ * @return weight of the shortest path from "from" to "to"
+ */
+double evaluateDijkstra(graph::SuperGraph &graph, const int from, const int to) {
+  double weightFromTo = NAN;
+  auto shortestPaths = dijkstra(graph, from);
+  for (int i = 0; i < shortestPaths.size(); i++) {
+    if (i == from) continue;
+    cout << "Path from " << from << " to " << i << ": ";
+    auto weight = checkAndPrintPath(shortestPaths[i]);
+    if (i == to) weightFromTo = weight;
+  }
+  return weightFromTo;
+}
+
+/**
+ * @return weight of the shortest path from 2 to 0
+ */
+double evaluateDijkstra2to0(graph::SuperGraph &graph) {
+  return evaluateDijkstra(graph, 2, 0);
+}
+
+/**
+ * @return weight of the shortest path from 0 to 1
+ */
+double evaluateDijkstra0to1(graph::SuperGraph &graph) {
+  return evaluateDijkstra(graph, 0, 1);
 }
