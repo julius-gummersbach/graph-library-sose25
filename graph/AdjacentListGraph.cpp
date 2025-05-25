@@ -18,9 +18,9 @@ namespace graph {
     numNodes = mstEdgeList.size() + 1;
     adjacencyList.resize(numNodes);
     for (const auto& edge : mstEdgeList) {
-      adjacencyList[edge->getFrom()][edge->getTo()] = edge;
+      adjacencyList[edge->getFrom()].push_back(edge);
       if (!directed) {
-        adjacencyList[edge->getTo()][edge->getFrom()] = edge;
+        adjacencyList[edge->getTo()].push_back(edge);
       }
     }
     initialized = true;
@@ -52,14 +52,14 @@ namespace graph {
       ls >> u >> v;
       if (weighted) {
         ls >> w;
-        adjacencyList[u][v] = std::make_shared<const edge::WeightedEdge>(u,v, w);
+        adjacencyList[u].push_back(std::make_shared<const edge::WeightedEdge>(u,v, w));
         if (!directed) {
-          adjacencyList[v][u] = std::make_shared<const edge::WeightedEdge>(v,u, w);
+          adjacencyList[v].push_back(std::make_shared<const edge::WeightedEdge>(v,u, w));
         }
       } else {
-        adjacencyList[u][v] = std::make_shared<const edge::SuperEdge>(u,v);
+        adjacencyList[u].push_back(std::make_shared<const edge::SuperEdge>(u,v));
         if (!directed) {
-          adjacencyList[v][u] = std::make_shared<const edge::SuperEdge>(v,u);
+          adjacencyList[v].push_back(std::make_shared<const edge::SuperEdge>(v,u));
         }
       }
     } while (std::getline(input, line));
@@ -68,12 +68,7 @@ namespace graph {
 
 
   std::vector<std::shared_ptr<const edge::SuperEdge>> AdjacentListGraph::getAdjacent(const int node) {
-    vector<std::shared_ptr<const edge::SuperEdge>> result;
-    result.reserve(adjacencyList[node].size());
-    for (const auto& edge : adjacencyList[node]) {
-      result.push_back(edge.second);
-    }
-    return result;
+    return adjacencyList[node];
   }
 
   std::vector<std::shared_ptr<const edge::SuperEdge>> AdjacentListGraph::getEdges() {
@@ -89,6 +84,14 @@ namespace graph {
   }
 
   std::shared_ptr<const edge::SuperEdge> AdjacentListGraph::getEdge(const int u, const int v) {
-    return adjacencyList[u][v];
+    for (const auto& edge : adjacencyList[u]) {
+      if (edge->getTo() == v) return edge;
+    }
+    if (!directed) {
+      for (const auto& edge : adjacencyList[v]) {
+        if (edge->getTo() == u) return edge;
+      }
+    }
+    return nullptr;
   }
 }

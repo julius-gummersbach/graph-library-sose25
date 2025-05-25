@@ -20,7 +20,7 @@ namespace graph {
       std::vector<std::shared_ptr<const edge::SuperEdge>> getEdges() override;
       std::shared_ptr<const edge::SuperEdge> getEdge(int u, int v) override;
     private:
-      std::vector<std::map<int, std::shared_ptr<const edge::SuperEdge>>> adjacencyList;
+      std::vector<std::vector<std::shared_ptr<const edge::SuperEdge>>> adjacencyList;
   };
 }
 
