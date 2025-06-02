@@ -115,9 +115,9 @@ int main() {
   assertFunctionOnGraph(INPUT_DIR + "0x03/K_10e.txt", new graph::AdjacentMatrixGraph(), evaluateTspBruteForce, 1);
   assertFunctionOnGraph(INPUT_DIR + "0x03/K_12.txt", new graph::AdjacentMatrixGraph(), evaluateTspBruteForce, 1);
   assertFunctionOnGraph(INPUT_DIR + "0x03/K_12e.txt", new graph::AdjacentMatrixGraph(), evaluateTspBruteForce, 1);
-  /* these would be expected to take roughly 30min
-  assertFunctionOnGraph(INPUT_DIR + "0x03/K_15.txt", new graph::AdjacentMatrixGraph(), evaluateTspBruteForce, 1);
-  assertFunctionOnGraph(INPUT_DIR + "0x03/K_15e.txt", new graph::AdjacentMatrixGraph(), evaluateTspBruteForce, 1); */
+  // these would be expected to take roughly 30min
+  // assertFunctionOnGraph(INPUT_DIR + "0x03/K_15.txt", new graph::AdjacentMatrixGraph(), evaluateTspBruteForce, 1);
+  // assertFunctionOnGraph(INPUT_DIR + "0x03/K_15e.txt", new graph::AdjacentMatrixGraph(), evaluateTspBruteForce, 1);
 
   // 0x04, Shortest Paths Dijkstra
   cout << "############################################" << endl;
@@ -126,6 +126,7 @@ int main() {
   assertFunctionOnGraph(INPUT_DIR + "0x04/Wege1.txt", new graph::AdjacentListGraph(), evaluateDijkstra2to0, 6, true);
   assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::AdjacentListGraph(), evaluateDijkstra0to1, 5.56283, true);
   assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::AdjacentListGraph(), evaluateDijkstra0to1, 2.36802, false);
+  assertFunctionOnGraph(INPUT_DIR + "0x04/WegeCustom.txt", new graph::AdjacentListGraph(), evaluateDijkstra2to0, 6, true);
 
   // 0x04, Shortest Paths Moore-Bellman-Ford
   cout << "############################################" << endl;
@@ -140,6 +141,7 @@ int main() {
   }
   assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::EdgeListGraph(), evaluateMooreBellmanFord0to1, 5.56283, true);
   assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::EdgeListGraph(), evaluateMooreBellmanFord0to1, 2.36802, false);
+  assertFunctionOnGraph(INPUT_DIR + "0x04/WegeCustom.txt", new graph::EdgeListGraph(), evaluateMooreBellmanFord2to0, 6, true);
 
   return 0;
 }
@@ -324,13 +326,26 @@ double evaluateDijkstra0to1(graph::SuperGraph &graph) {
  */
 double evaluateMooreBellmanFord(graph::SuperGraph &graph, const int from, const int to) {
   double weightFromTo = NAN;
+  auto reached = vector(graph.numNodes, false);
+  reached[from] = true;
   auto shortestPaths = mooreBellmanFord(graph, from);
-  for (int i = 0; i < shortestPaths.size(); i++) {
-    if (i == from) continue;
-    cout << "Path from " << from << " to " << i << ": ";
-    const auto weight = checkAndPrintPath(shortestPaths[i]);
-    if (i == to) weightFromTo = weight;
+  for (auto& p : shortestPaths) {
+    if (p.first == from) continue;
+    reached[p.first] = true;
+    cout << "Path from " << from << " to " << p.first << ": ";
+    const auto weight = checkAndPrintPath(p.second);
+    if (p.first == to) weightFromTo = weight;
   }
+  auto prefix = "Unreachable nodes: ";
+  auto suffix = "All nodes have been reached.";
+  for (int i = 0; i < graph.numNodes; i++) {
+    if (!reached[i]) {
+      cout << prefix << i;
+      prefix = ", ";
+      suffix = ".";
+    }
+  }
+  cout << suffix << endl;
   return weightFromTo;
 }
 

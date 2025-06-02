@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -fexperimental-library")
 set(CMAKE_OSX_DEPLOYMENT_TARGET "15.4")
 
+find_package(Boost REQUIRED)
+
 
 add_executable(graph-library-gummersbach
         main.cpp
@@ -16,4 +18,7 @@ add_executable(graph-library-gummersbach
         helper/UnionFind.h
         edge/SuperEdge.h
         edge/WeightedEdge.h
+        0x05.cpp
 )
+
+target_include_directories(graph-library-gummersbach PRIVATE ${Boost_INCLUDE_DIRS})
