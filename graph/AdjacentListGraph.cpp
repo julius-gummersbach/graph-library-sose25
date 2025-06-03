@@ -5,10 +5,6 @@
 
 #include "../edge/WeightedEdge.h"
 
-namespace edge {
-  class WeightedEdge;
-}
-
 namespace graph {
   using namespace std;
 
@@ -93,5 +89,9 @@ namespace graph {
       }
     }
     return nullptr;
+  }
+
+  void AdjacentListGraph::addEdge(std::shared_ptr<const edge::SuperEdge> edge) {
+    throw std::runtime_error("Not implemented yet.");
   }
 }

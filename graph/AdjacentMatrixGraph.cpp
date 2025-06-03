@@ -7,6 +7,7 @@
 #include "../edge/WeightedEdge.h"
 
 namespace graph {
+  AdjacentMatrixGraph::AdjacentMatrixGraph() = default;
 
   void AdjacentMatrixGraph::initializeFromInput(std::istream &input) {
     std::ios::sync_with_stdio(false);
@@ -49,17 +50,30 @@ namespace graph {
         ls >> w;
         adjacencyMatrix[index] = std::make_shared<const edge::WeightedEdge>(u, v, w);
       } else {
-        adjacencyMatrix[index] = std::make_shared<const edge::SuperEdge>(u,v);
+        adjacencyMatrix[index] = std::make_shared<const edge::SuperEdge>(u, v);
       }
     } while (std::getline(input, line));
     initialized = true;
   }
 
-  std::vector<std::shared_ptr<const edge::SuperEdge>> AdjacentMatrixGraph::getAdjacent(const int node) {
+  AdjacentMatrixGraph::AdjacentMatrixGraph(const std::vector<std::shared_ptr<const edge::WeightedEdge> > &edgeList) {
+    directed = true;
+    weighted = true;
+    for (const auto &edge: edgeList) {
+      numNodes = std::max(numNodes, std::max(edge->getFrom(), edge->getTo()) + 1);
+    }
+    adjacencyMatrix = std::vector<std::shared_ptr<const edge::SuperEdge> >();
+    adjacencyMatrix.resize(numNodes * numNodes);
+    for (const auto &edge: edgeList) {
+      adjacencyMatrix[edge->getFrom() * numNodes + edge->getTo()] = edge;
+    }
+  }
+
+  std::vector<std::shared_ptr<const edge::SuperEdge> > AdjacentMatrixGraph::getAdjacent(const int node) {
     if (adjacencyCache.contains(node)) {
       return adjacencyCache.at(node);
     }
-    std::vector<std::shared_ptr<const edge::SuperEdge>> adjacent;
+    std::vector<std::shared_ptr<const edge::SuperEdge> > adjacent;
     adjacent.reserve(numNodes);
     for (int i = 0; i < numNodes; i++) {
       int index;
@@ -74,8 +88,30 @@ namespace graph {
     return adjacent;
   }
 
-  std::vector<std::shared_ptr<const edge::SuperEdge>> AdjacentMatrixGraph::getEdges() {
-    throw std::runtime_error("Not implemented yet.");
+  std::vector<std::shared_ptr<const edge::SuperEdge> > AdjacentMatrixGraph::getEdges() {
+    if (!directed) throw std::runtime_error("Not implemented");
+    std::vector<std::shared_ptr<const edge::SuperEdge> > edges;
+    edges.reserve(numNodes);
+    for (const auto &edge: adjacencyMatrix) {
+      if (edge != nullptr) edges.push_back(edge);
+    }
+    return edges;
+  }
+
+  void AdjacentMatrixGraph::addEdge(std::shared_ptr<const edge::SuperEdge> edge) {
+    if (!directed) throw std::runtime_error("Not implemented yet.");
+    if (weighted && std::dynamic_pointer_cast<const edge::WeightedEdge>(edge) == nullptr) {
+      throw std::invalid_argument("Attempted to add unweighted Edge to weighted Graph");
+    }
+    adjacencyMatrix[edge->getFrom() * numNodes + edge->getTo()] = edge;
+    // erase previous edge from adjacency cache
+    if (adjacencyCache.contains(edge->getFrom())) {
+      erase_if(adjacencyCache[edge->getFrom()],
+        [edge](const std::shared_ptr<const edge::SuperEdge>& cachedEdge) {
+          return cachedEdge->getTo() == edge->getTo();
+        });
+      adjacencyCache[edge->getFrom()].push_back(edge);
+    }
   }
 
   std::shared_ptr<const edge::SuperEdge> AdjacentMatrixGraph::getEdge(const int u, const int v) {

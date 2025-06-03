@@ -3,7 +3,6 @@
 #include "../edge/WeightedEdge.h"
 
 namespace graph {
-
   /*
    * currently only supports weighted graphs
    */
@@ -30,6 +29,10 @@ namespace graph {
   }
 
   std::shared_ptr<const edge::SuperEdge> EdgeListGraph::getEdge(int u, int v) {
+    throw std::runtime_error("Not implemented yet.");
+  }
+
+  void EdgeListGraph::addEdge(std::shared_ptr<const edge::SuperEdge> edge) {
     throw std::runtime_error("Not implemented yet.");
   }
 }

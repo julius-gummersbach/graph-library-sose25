@@ -19,6 +19,9 @@ add_executable(graph-library-gummersbach
         edge/SuperEdge.h
         edge/WeightedEdge.h
         0x05.cpp
+        helper/AugmentingPathFinder.h
+        helper/BfsAugmentingPathFinder.cpp
+        helper/BfsAugmentingPathFinder.h
 )
 
 target_include_directories(graph-library-gummersbach PRIVATE ${Boost_INCLUDE_DIRS})

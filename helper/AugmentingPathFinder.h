@@ -1,0 +1,34 @@
+//
+// Created by Julius Gummersbach on 03.06.25.
+//
+
+#ifndef AUGMENTINGPATHFINDER_H
+#define AUGMENTINGPATHFINDER_H
+#include <map>
+#include <vector>
+
+#include "../graph/SuperGraph.h"
+#include "../edge/WeightedEdge.h"
+
+namespace helper {
+  class AugmentingPathFinder {
+  public:
+    /**
+     * @param graph The underlying graph
+     * @param flow maps each edge to its current flow
+     * @param source source node
+     * @param sink sink node
+     * @return pair of an augmenting path and its bottleneck value
+     */
+    virtual std::pair<std::vector<std::shared_ptr<const edge::WeightedEdge> >, double> getAugmentingPath(
+      graph::SuperGraph &graph,
+      std::map<std::shared_ptr<const edge::WeightedEdge>, double> flow,
+      int source,
+      int sink
+    ) const = 0;
+
+    virtual ~AugmentingPathFinder() = default;
+  };
+} // helper
+
+#endif //AUGMENTINGPATHFINDER_H

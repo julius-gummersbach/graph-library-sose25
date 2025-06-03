@@ -14,6 +14,7 @@
 #include "0x02.cpp"
 #include "0x03.cpp"
 #include "0x04.cpp"
+#include "0x05.cpp"
 
 using namespace std;
 
@@ -30,6 +31,7 @@ double evaluateDijkstra2to0(graph::SuperGraph &graph);
 double evaluateDijkstra0to1(graph::SuperGraph &graph);
 double evaluateMooreBellmanFord2to0(graph::SuperGraph &graph);
 double evaluateMooreBellmanFord0to1(graph::SuperGraph &graph);
+double evaluateEdmondsKarp0to7(graph::SuperGraph &graph);
 
 
 int main() {
@@ -142,6 +144,14 @@ int main() {
   assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::EdgeListGraph(), evaluateMooreBellmanFord0to1, 5.56283, true);
   assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::EdgeListGraph(), evaluateMooreBellmanFord0to1, 2.36802, false);
   assertFunctionOnGraph(INPUT_DIR + "0x04/WegeCustom.txt", new graph::EdgeListGraph(), evaluateMooreBellmanFord2to0, 6, true);
+
+  // 0x05, Max Flow EdmondsKarp
+  cout << "############################################" << endl;
+  cout << "############################################" << endl;
+  cout << "0x05, Max Flow EdmondsKarp" << endl;
+  assertFunctionOnGraph(INPUT_DIR + "0x05/Fluss.txt", new graph::AdjacentMatrixGraph(), evaluateEdmondsKarp0to7, 4, true);
+  assertFunctionOnGraph(INPUT_DIR + "0x05/Fluss2.txt", new graph::AdjacentMatrixGraph(), evaluateEdmondsKarp0to7, 5, true);
+  assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::AdjacentMatrixGraph(), evaluateEdmondsKarp0to7, 0.75447, true);
 
   return 0;
 }
@@ -361,4 +371,8 @@ double evaluateMooreBellmanFord2to0(graph::SuperGraph &graph) {
  */
 double evaluateMooreBellmanFord0to1(graph::SuperGraph &graph) {
   return evaluateMooreBellmanFord(graph, 0, 1);
+}
+
+double evaluateEdmondsKarp0to7(graph::SuperGraph &graph) {
+  return edmondsKarp(graph, 0, 7);
 }

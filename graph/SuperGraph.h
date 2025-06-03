@@ -21,6 +21,14 @@ namespace graph {
 
     virtual std::vector<std::shared_ptr<const edge::SuperEdge>> getEdges() = 0;
     virtual std::shared_ptr<const edge::SuperEdge> getEdge(int u, int v) = 0;
+
+    /**
+     * Adds the given edge to the graph.
+     * If an edge between the two nodes already exists, it is overwritten.
+     * NumNodes is updated if needed.
+     * If the graph is weighted, edge must be an instance of WeightedEdge.
+     */
+    virtual void addEdge(std::shared_ptr<const edge::SuperEdge> edge) = 0;
   };
 }
 
