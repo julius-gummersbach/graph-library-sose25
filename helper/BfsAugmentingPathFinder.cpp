@@ -20,8 +20,7 @@ namespace helper {
         continue;
       }
       visited[currentNode] = true;
-      const auto& temp = graph.getAdjacent(currentNode); // todo
-      for (auto& adjacent : temp) {
+      for (auto& adjacent : graph.getAdjacent(currentNode)) {
         const auto& adjacentWeighted = static_pointer_cast<const edge::WeightedEdge>(adjacent);
         const auto capacity = adjacentWeighted->getWeight() - flow[adjacentWeighted];
         if (capacity > 0) {
