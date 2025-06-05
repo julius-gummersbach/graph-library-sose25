@@ -7,9 +7,6 @@
 
 using namespace std;
 
-// todo Note mündliches Argumentieren besprechen
-// todo Praktikumserklärung hatte keinen Sound, war stumm
-
 /**
  * Calculates the maximum flow in a graph
  * @param graph the underlying, directed graph with no double edges. it will be modified to a residual graph by this algorithm
@@ -19,9 +16,9 @@ using namespace std;
  * @return the maximum flow from source to sink
  */
 static double fordFulkerson(graph::SuperGraph& graph, const helper::AugmentingPathFinder* pathFinder, const int source, const int sink) {
-  const auto edgeList = graph.getEdges();
   map<shared_ptr<const edge::WeightedEdge>, double> flow;
-  for (const auto& edge : edgeList) {
+  // create residual graph
+  for (const auto& edge : graph.getEdges()) {
     auto forwardEdgePtr = static_pointer_cast<const edge::WeightedEdge>(edge);
     if (forwardEdgePtr->getWeight() < 0) throw std::invalid_argument("negative capacities are not allowed");
     if (forwardEdgePtr->getWeight() > 0) {
@@ -35,7 +32,7 @@ static double fordFulkerson(graph::SuperGraph& graph, const helper::AugmentingPa
   while (true) {
     auto [path, bottleneck]
       = pathFinder->getAugmentingPath(graph, flow, source, sink);
-    if (bottleneck == 0) break;
+    if (path.empty()) break;
     for (const auto& edge : path) {
       flow[edge] += bottleneck;
       const auto& complementaryEdge

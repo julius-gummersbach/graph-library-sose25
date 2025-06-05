@@ -18,7 +18,8 @@ namespace helper {
      * @param flow maps each edge to its current flow
      * @param source source node
      * @param sink sink node
-     * @return pair of an augmenting path and its bottleneck value
+     * @return Pair of an augmenting path and its bottleneck value.
+     *         If there is no path, return an empty path and a bottleneck of 0
      */
     virtual std::pair<std::vector<std::shared_ptr<const edge::WeightedEdge> >, double> getAugmentingPath(
       graph::SuperGraph &graph,
