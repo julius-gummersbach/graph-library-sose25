@@ -37,7 +37,6 @@ double evaluateCycleCancelling(graph::SuperGraph &graph);
 
 
 int main() {
-  /*
   // 0x01, connected components
   cout << "############################################" << endl;
   cout << "############################################" << endl;
@@ -155,7 +154,7 @@ int main() {
   assertFunctionOnGraph(INPUT_DIR + "0x05/Fluss.txt", new graph::AdjacentMatrixGraph(), evaluateEdmondsKarp0to7, 4, true);
   assertFunctionOnGraph(INPUT_DIR + "0x05/Fluss2.txt", new graph::AdjacentMatrixGraph(), evaluateEdmondsKarp0to7, 5, true);
   assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::AdjacentMatrixGraph(), evaluateEdmondsKarp0to7, 0.75447, true);
-*/
+
   assertFunctionOnGraph(INPUT_DIR + "0x06/Kostenminimal1.txt", new graph::EdgeListGraph(), evaluateCycleCancelling, 3, true);
   assertFunctionOnGraph(INPUT_DIR + "0x06/Kostenminimal2.txt", new graph::EdgeListGraph(), evaluateCycleCancelling, 0, true);
   try {
@@ -214,7 +213,7 @@ void assertFunctionOnGraph(const string& inputFile, graph::SuperGraph* graph, do
   cout << "Total time: " << (setupDuration + calcDuration).count() << " ms" << endl;
   cout << "Result: " << result << " expected: " << expectedResult << endl;
 
-  assert(("Test failed: Result does not match expected value", abs(result - expectedResult) < DBL_EPSILON));
+  assert(("Test failed: Result does not match expected value", abs(result - expectedResult) < 0.00001));
   cout << "============================" << endl << endl;
 
   delete graph;

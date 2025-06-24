@@ -32,10 +32,11 @@ namespace graph {
     double cost;
     double capacity;
     while (input >> u >> v >> cost) {
-      if (input >> capacity) {
-        edgeList.push_back(std::make_shared<const edge::CostCapEdge>(u, v, cost, capacity));
-      } else {
+      if (input.peek() == '\n' || input.peek() == '\r') {
         edgeList.push_back(std::make_shared<const edge::CostCapEdge>(u, v, cost));
+      } else {
+        input >> capacity;
+        edgeList.push_back(std::make_shared<const edge::CostCapEdge>(u, v, cost, capacity));
       }
     }
     initialized = true;
