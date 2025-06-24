@@ -34,7 +34,7 @@ static map<int, vector<shared_ptr<const edge::CostCapEdge>>> buildNegativeCycleF
     path.insert(path.begin(), predecessorList[currentNode]);
     currentNode = predecessorList[currentNode]->getFrom();
   }
-  while (path.front()->getFrom() != currentNode) path.erase(path.begin());
+  while (path.back()->getTo() != currentNode) path.pop_back();
 
   result[-1] = path;
   return result;
