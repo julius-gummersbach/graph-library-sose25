@@ -34,6 +34,7 @@ double evaluateMooreBellmanFord2to0(graph::SuperGraph &graph);
 double evaluateMooreBellmanFord0to1(graph::SuperGraph &graph);
 double evaluateEdmondsKarp0to7(graph::SuperGraph &graph);
 double evaluateCycleCancelling(graph::SuperGraph &graph);
+double evaluateSuccessiveShortestPath(graph::SuperGraph &graph);
 
 
 int main() {
@@ -175,6 +176,30 @@ int main() {
   assertFunctionOnGraph(INPUT_DIR + "0x06/Kostenminimal_gross2.txt", new graph::EdgeListGraph(), evaluateCycleCancelling, 1838, true);
   try {
     assertFunctionOnGraph(INPUT_DIR + "0x06/Kostenminimal_gross3.txt", new graph::EdgeListGraph(), evaluateCycleCancelling, 3, true);
+  } catch (const std::invalid_argument& e) {
+    cout << "No b-flow possible detected successfully: " << e.what() << endl << endl << endl;
+  }
+
+  // 0x06, Successive-Shortest-Path
+  cout << "############################################" << endl;
+  cout << "############################################" << endl;
+  cout << "0x06, Successive-Shortest-Path" << endl;
+  assertFunctionOnGraph(INPUT_DIR + "0x06/Kostenminimal1.txt", new graph::EdgeListGraph(), evaluateSuccessiveShortestPath, 3, true);
+  assertFunctionOnGraph(INPUT_DIR + "0x06/Kostenminimal2.txt", new graph::EdgeListGraph(), evaluateSuccessiveShortestPath, 0, true);
+  try {
+    assertFunctionOnGraph(INPUT_DIR + "0x06/Kostenminimal3.txt", new graph::EdgeListGraph(), evaluateSuccessiveShortestPath, 3, true);
+  } catch (const std::invalid_argument& e) {
+    cout << "No b-flow possible detected successfully: " << e.what() << endl << endl << endl;
+  }
+  try {
+    assertFunctionOnGraph(INPUT_DIR + "0x06/Kostenminimal4.txt", new graph::EdgeListGraph(), evaluateSuccessiveShortestPath, 3, true);
+  } catch (const std::invalid_argument& e) {
+    cout << "No b-flow possible detected successfully: " << e.what() << endl << endl << endl;
+  }
+  assertFunctionOnGraph(INPUT_DIR + "0x06/Kostenminimal_gross1.txt", new graph::EdgeListGraph(), evaluateSuccessiveShortestPath, 1537, true);
+  assertFunctionOnGraph(INPUT_DIR + "0x06/Kostenminimal_gross2.txt", new graph::EdgeListGraph(), evaluateSuccessiveShortestPath, 1838, true);
+  try {
+    assertFunctionOnGraph(INPUT_DIR + "0x06/Kostenminimal_gross3.txt", new graph::EdgeListGraph(), evaluateSuccessiveShortestPath, 3, true);
   } catch (const std::invalid_argument& e) {
     cout << "No b-flow possible detected successfully: " << e.what() << endl << endl << endl;
   }
@@ -406,5 +431,9 @@ double evaluateEdmondsKarp0to7(graph::SuperGraph &graph) {
 }
 
 double evaluateCycleCancelling(graph::SuperGraph &graph) {
-  return get<1>(cycleCancelling(graph));
+  return cycleCancelling(graph);
+}
+
+double evaluateSuccessiveShortestPath(graph::SuperGraph &graph) {
+  return successiveShortestPath(graph);
 }

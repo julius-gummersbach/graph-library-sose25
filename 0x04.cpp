@@ -66,13 +66,13 @@ static map<int, vector<shared_ptr<const edge::CostCapEdge>>> dijkstra(graph::Sup
     const int currentNode = toVisit.top();
     toVisit.pop();
     if (shortestDistance[currentNode] == INFINITY) break;  // rest of graph is unreachable
-    for (const auto& edge: graph.getAdjacent(currentNode)) {
-      const auto weightedEdge = static_pointer_cast<const edge::CostCapEdge>(edge);
-      double newDistance = shortestDistance[currentNode] + weightedEdge->getCost();
-      if (newDistance < shortestDistance[weightedEdge->getTo()]) {
-        shortestDistance[weightedEdge->getTo()] = newDistance;
-        if (!toVisit.empty()) toVisit.decrease(handles[weightedEdge->getTo()]);
-        predecessorList[weightedEdge->getTo()] = weightedEdge;
+    for (const auto& superEdge: graph.getAdjacent(currentNode)) {
+      const auto edge = static_pointer_cast<const edge::CostCapEdge>(superEdge);
+      const double newDistance = shortestDistance[currentNode] + edge->getCost();
+      if (newDistance < shortestDistance[edge->getTo()]) {
+        shortestDistance[edge->getTo()] = newDistance;
+        if (!toVisit.empty()) toVisit.decrease(handles[edge->getTo()]);
+        predecessorList[edge->getTo()] = edge;
       }
     }
   }

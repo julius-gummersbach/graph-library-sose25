@@ -14,7 +14,7 @@ namespace graph {
       explicit EdgeListGraph(const std::vector<std::shared_ptr<const edge::CostCapEdge>>& list, const bool isDirected) {
         for (const auto& e : list) {
           edgeList.push_back(e);
-          numNodes = std::max(numNodes, std::max(e->getFrom(), e->getTo()));
+          numNodes = std::max(numNodes, std::max(e->getFrom(), e->getTo()) + 1);
         }
         initialized = true;
         weighted = true;
