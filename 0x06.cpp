@@ -129,7 +129,7 @@ static pair<double, double> cycleCancelling(graph::SuperGraph& graph) {
         maxFlowDistribution[*edge] += bottleneck;
         costResult += bottleneck * edge->getCost();
       } else {  // edge is backward edge
-        auto realEdge = static_pointer_cast<const edge::CostCapEdge>(cycleCheckingGraph.getEdge(edge->getFrom(), edge->getTo()));
+        auto realEdge = static_pointer_cast<const edge::CostCapEdge>(graph.getEdge(edge->getTo(), edge->getFrom()));
         maxFlowDistribution[*realEdge] -= bottleneck;
         costResult -= bottleneck * realEdge->getCost();
       }
