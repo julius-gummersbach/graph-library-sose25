@@ -33,6 +33,10 @@
  *
  */
 
+/**
+ * Calculates the maximum flow possible in the graph and minimizes its costs
+ * @return pair containing maximum flow value and minium possible cost of that flow
+ */
 static pair<double, double> cycleCancelling(graph::SuperGraph& graph) {
   double balanceSum = 0.0;
   bool existsSource = false;
@@ -41,7 +45,7 @@ static pair<double, double> cycleCancelling(graph::SuperGraph& graph) {
     existsSource = existsSource || graph.getBalance(i) > 0;
   }
   if (abs(balanceSum) > DBL_EPSILON) {
-    throw invalid_argument("Balance values inconsistent, no b-flow possible");
+    throw invalid_argument("Balance values inconsistent");
   }
   if (!existsSource) {
     throw invalid_argument("All balance values are 0, no b-flow possible");
@@ -76,10 +80,10 @@ static pair<double, double> cycleCancelling(graph::SuperGraph& graph) {
   }
 
   // check flow and update cost
-  for (const auto& edge : flowEdgeList) {
-    auto costCapEdge = static_pointer_cast<const edge::CostCapEdge>(edge);
-    costResult += costCapEdge->getCost() * maxFlowDistribution[*costCapEdge];
-    if (costCapEdge->getFrom() == pseudoSource && abs(maxFlowDistribution[*costCapEdge] - costCapEdge->getCapacity()) > DBL_EPSILON) {
+  for (const auto& superEdge : flowEdgeList) {
+    auto edge = static_pointer_cast<const edge::CostCapEdge>(superEdge);
+    costResult += edge->getCost() * maxFlowDistribution[*edge];
+    if (edge->getFrom() == pseudoSource && abs(maxFlowDistribution[*edge] - edge->getCapacity()) > DBL_EPSILON) {
       // one of the pseudo-edges is not fully used
       throw invalid_argument("No b-flow possible");
     }
@@ -89,21 +93,21 @@ static pair<double, double> cycleCancelling(graph::SuperGraph& graph) {
   while (true) {
     // create cycle-checking graph
     vector<shared_ptr<const edge::CostCapEdge>> cycleCheckingEdgeList;
-    for (const auto& edge : *edgeList) {
-      auto costCapEdge = static_pointer_cast<const edge::CostCapEdge>(edge);
-      if (costCapEdge->getCapacity() - maxFlowDistribution[*costCapEdge] > 0) {  // Vorwärts-Kanten, die noch Kapazität haben
+    for (const auto& superEdge : *edgeList) {
+      auto edge = static_pointer_cast<const edge::CostCapEdge>(superEdge);
+      if (edge->getCapacity() - maxFlowDistribution[*edge] > 0) {  // Vorwärts-Kanten, die noch Kapazität haben
         cycleCheckingEdgeList.push_back(std::make_shared<edge::CostCapEdge>(
-          costCapEdge->getFrom(),
-          costCapEdge->getTo(),
-          costCapEdge->getCost(),
-          costCapEdge->getCapacity() - maxFlowDistribution[*costCapEdge]));
+          edge->getFrom(),
+          edge->getTo(),
+          edge->getCost(),
+          edge->getCapacity() - maxFlowDistribution[*edge]));
       }
-      if (maxFlowDistribution[*costCapEdge] > 0) {  // Rückwärts-Kanten für die Vorwärts-Kanten, auf denen Fluss fließt
+      if (maxFlowDistribution[*edge] > 0) {  // Rückwärts-Kanten für die Vorwärts-Kanten, auf denen Fluss fließt
         cycleCheckingEdgeList.push_back(std::make_shared<edge::CostCapEdge>(
-          costCapEdge->getTo(),
-          costCapEdge->getFrom(),
-          -costCapEdge->getCost(),
-          maxFlowDistribution[*costCapEdge]));
+          edge->getTo(),
+          edge->getFrom(),
+          -edge->getCost(),
+          maxFlowDistribution[*edge]));
       }
     }
     // add pseudo-start node
@@ -115,7 +119,9 @@ static pair<double, double> cycleCancelling(graph::SuperGraph& graph) {
 
     // look for negative cycles, if none is found, terminate
     auto mooreBellmanFordResult = mooreBellmanFord(cycleCheckingGraph, startNode);
-    if (!mooreBellmanFordResult.contains(-1)) break;
+    if (!mooreBellmanFordResult.contains(-1)) {
+      break;
+    }
     auto negativeCycle = mooreBellmanFordResult[-1];
 
     // calculate bottleneck
@@ -129,10 +135,11 @@ static pair<double, double> cycleCancelling(graph::SuperGraph& graph) {
         maxFlowDistribution[*edge] += bottleneck;
         costResult += bottleneck * edge->getCost();
       } else {  // edge is backward edge
-        auto realEdge = static_pointer_cast<const edge::CostCapEdge>(graph.getEdge(edge->getTo(), edge->getFrom()));
-        maxFlowDistribution[*realEdge] -= bottleneck;
-        costResult -= bottleneck * realEdge->getCost();
+        auto forwardEdge = static_pointer_cast<const edge::CostCapEdge>(graph.getEdge(edge->getTo(), edge->getFrom()));
+        maxFlowDistribution[*forwardEdge] -= bottleneck;
+        costResult -= bottleneck * forwardEdge->getCost();
       }
+     // costResult += bottleneck * edge->getCost();  // could also do this. if edge is backward edge, its cost will be inverted
     }
   }
   return make_pair(flowResult, costResult);
