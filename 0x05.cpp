@@ -17,6 +17,7 @@
  */
 static pair<double, unordered_map<edge::CostCapEdge, double, edge::CostCapEdgeHasher>> fordFulkerson(graph::SuperGraph& graph, const helper::AugmentingPathFinder* pathFinder, const int source, const int target) {
   unordered_map<edge::CostCapEdge, double, edge::CostCapEdgeHasher> flow;
+  vector<shared_ptr<const edge::CostCapEdge>> backwardEdges;
   // create residual graph
   const auto edges = graph.getEdges();
   for (const auto& edge : *edges) {
@@ -25,6 +26,7 @@ static pair<double, unordered_map<edge::CostCapEdge, double, edge::CostCapEdgeHa
     if (forwardEdgePtr->getCapacity() > 0) {
       auto backwardEdgePtr = make_shared<const edge::CostCapEdge>(edge->getTo(), edge->getFrom(), 0);
       graph.addEdge(backwardEdgePtr);
+      backwardEdges.push_back(backwardEdgePtr);
       flow[*forwardEdgePtr] = 0;
       flow[*backwardEdgePtr] = 0;
     }
@@ -41,6 +43,10 @@ static pair<double, unordered_map<edge::CostCapEdge, double, edge::CostCapEdgeHa
       flow[*complementaryEdge] -= bottleneck;
     }
     currentFlow += bottleneck;
+  }
+  // remove backward edges from flow map
+  for (const auto& edge : backwardEdges) {
+    flow.erase(*edge);
   }
   return make_pair(currentFlow, flow);
 }
