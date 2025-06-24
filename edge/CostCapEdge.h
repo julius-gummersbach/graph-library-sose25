@@ -1,7 +1,5 @@
 #ifndef WEIGHTEDEDGE_H
 #define WEIGHTEDEDGE_H
-#include <stdexcept>
-#include <string>
 
 #include "SuperEdge.h"
 
@@ -17,6 +15,9 @@ namespace edge {
 
     virtual bool operator<(const CostCapEdge& other) const {
       return this->cost < other.cost;
+    }
+    bool operator==(const CostCapEdge& other) const {
+      return this->getFrom() == other.getFrom() && this->getTo() == other.getTo();
     }
   private:
     double cost;

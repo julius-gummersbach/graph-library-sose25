@@ -155,6 +155,10 @@ int main() {
   assertFunctionOnGraph(INPUT_DIR + "0x05/Fluss2.txt", new graph::AdjacentMatrixGraph(), evaluateEdmondsKarp0to7, 5, true);
   assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::AdjacentMatrixGraph(), evaluateEdmondsKarp0to7, 0.75447, true);
 
+  // 0x06, Cycle-Cancelling
+  cout << "############################################" << endl;
+  cout << "############################################" << endl;
+  cout << "0x06, Cycle-Cancelling" << endl;
   assertFunctionOnGraph(INPUT_DIR + "0x06/Kostenminimal1.txt", new graph::EdgeListGraph(), evaluateCycleCancelling, 3, true);
   assertFunctionOnGraph(INPUT_DIR + "0x06/Kostenminimal2.txt", new graph::EdgeListGraph(), evaluateCycleCancelling, 0, true);
   try {

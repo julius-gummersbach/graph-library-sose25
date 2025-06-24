@@ -1,11 +1,9 @@
 #include <utility>
 
-using namespace std;
-
 #include "edge/CostCapEdge.h"
+#include "edge/CostCapEdgeHasher.h"
 #include "graph/SuperGraph.h"
 #include "graph/EdgeListGraph.h"
-#include "graph/AdjacentListGraph.h"
 
 /**
  * Cycle-Cancelling:
@@ -54,7 +52,7 @@ static pair<double, double> cycleCancelling(graph::SuperGraph& graph) {
   const auto edgeList = graph.getEdges();
 
   // add a pseudo-source and -target to graph according to balance values
-  auto flowEdgeList = edgeList;
+  auto flowEdgeList = *edgeList;
   int pseudoSource = graph.numNodes;
   int pseudoTarget = graph.numNodes + 1;
   for (int node = 0; node < graph.numNodes; node++) {
@@ -72,19 +70,17 @@ static pair<double, double> cycleCancelling(graph::SuperGraph& graph) {
   const auto maxFlowResult = edmondsKarp(flowGraph, pseudoSource, pseudoTarget);
   double flowResult = get<0>(maxFlowResult);
 
-  map<pair<int, int>, double> maxFlowDistribution;
-  for (const auto& keyValuePair : get<1>(maxFlowResult)) {
-    auto& edge = keyValuePair.first;
-    auto& flow = keyValuePair.second;
-    maxFlowDistribution[std::make_pair(edge->getFrom(), edge->getTo())] = flow;
+  unordered_map<edge::CostCapEdge, double, edge::CostCapEdgeHasher> maxFlowDistribution;
+  for (auto const&[edge, flow] : get<1>(maxFlowResult)) {
+    maxFlowDistribution[edge] = flow;
   }
 
   // check flow and update cost
   for (const auto& edge : flowEdgeList) {
     auto costCapEdge = static_pointer_cast<const edge::CostCapEdge>(edge);
-    costResult += costCapEdge->getCost() * maxFlowDistribution[std::make_pair(costCapEdge->getFrom(), costCapEdge->getTo())];
-    if (costCapEdge->getFrom() == pseudoSource && maxFlowDistribution[std::make_pair(costCapEdge->getFrom(), costCapEdge->getTo())] != costCapEdge->getCapacity()) {
-      // one of the pseudo-edges is not fully utilized
+    costResult += costCapEdge->getCost() * maxFlowDistribution[*costCapEdge];
+    if (costCapEdge->getFrom() == pseudoSource && abs(maxFlowDistribution[*costCapEdge] - costCapEdge->getCapacity()) > DBL_EPSILON) {
+      // one of the pseudo-edges is not fully used
       throw invalid_argument("No b-flow possible");
     }
   }
@@ -93,21 +89,21 @@ static pair<double, double> cycleCancelling(graph::SuperGraph& graph) {
   while (true) {
     // create cycle-checking graph
     vector<shared_ptr<const edge::CostCapEdge>> cycleCheckingEdgeList;
-    for (const auto& edge : edgeList) {
+    for (const auto& edge : *edgeList) {
       auto costCapEdge = static_pointer_cast<const edge::CostCapEdge>(edge);
-      if (costCapEdge->getCapacity() - maxFlowDistribution[std::make_pair(costCapEdge->getFrom(), costCapEdge->getTo())] > 0) {  // Vorwärts-Kanten, die noch Kapazität haben
+      if (costCapEdge->getCapacity() - maxFlowDistribution[*costCapEdge] > 0) {  // Vorwärts-Kanten, die noch Kapazität haben
         cycleCheckingEdgeList.push_back(std::make_shared<edge::CostCapEdge>(
           costCapEdge->getFrom(),
           costCapEdge->getTo(),
           costCapEdge->getCost(),
-          costCapEdge->getCapacity() - maxFlowDistribution[std::make_pair(costCapEdge->getFrom(), costCapEdge->getTo())]));  // todo geht das so mit den unterschiedlichen pointer typen?
+          costCapEdge->getCapacity() - maxFlowDistribution[*costCapEdge]));
       }
-      if (maxFlowDistribution[std::make_pair(costCapEdge->getFrom(), costCapEdge->getTo())] > 0) {  // Rückwärts-Kanten für die Vorwärts-Kanten, auf denen Fluss fließt
+      if (maxFlowDistribution[*costCapEdge] > 0) {  // Rückwärts-Kanten für die Vorwärts-Kanten, auf denen Fluss fließt
         cycleCheckingEdgeList.push_back(std::make_shared<edge::CostCapEdge>(
           costCapEdge->getTo(),
           costCapEdge->getFrom(),
           -costCapEdge->getCost(),
-          maxFlowDistribution[std::make_pair(costCapEdge->getFrom(), costCapEdge->getTo())]));
+          maxFlowDistribution[*costCapEdge]));
       }
     }
     // add pseudo-start node
@@ -129,12 +125,12 @@ static pair<double, double> cycleCancelling(graph::SuperGraph& graph) {
     }
     // update flow and cost
     for (const auto& edge : negativeCycle) {
-      if (maxFlowDistribution.contains(std::make_pair(edge->getFrom(), edge->getTo()))) {
-        maxFlowDistribution[std::make_pair(edge->getFrom(), edge->getTo())] += bottleneck;
+      if (maxFlowDistribution.contains(*edge)) {
+        maxFlowDistribution[*edge] += bottleneck;
         costResult += bottleneck * edge->getCost();
       } else {  // edge is backward edge
         auto realEdge = static_pointer_cast<const edge::CostCapEdge>(cycleCheckingGraph.getEdge(edge->getFrom(), edge->getTo()));
-        maxFlowDistribution[std::make_pair(realEdge->getFrom(), realEdge->getTo())] -= bottleneck;
+        maxFlowDistribution[*realEdge] -= bottleneck;
         costResult -= bottleneck * realEdge->getCost();
       }
     }

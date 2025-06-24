@@ -34,7 +34,7 @@ static map<int, vector<shared_ptr<const edge::CostCapEdge>>> buildNegativeCycleF
     path.insert(path.begin(), predecessorList[currentNode]);
     currentNode = predecessorList[currentNode]->getFrom();
   }
-  while (!path.front()->getFrom() == currentNode) path.erase(path.begin());
+  while (path.front()->getFrom() != currentNode) path.erase(path.begin());
 
   result[-1] = path;
   return result;
@@ -88,7 +88,8 @@ static map<int, vector<shared_ptr<const edge::CostCapEdge>>> dijkstra(graph::Sup
  */
 static map<int, vector<shared_ptr<const edge::CostCapEdge>>> mooreBellmanFord(graph::SuperGraph &graph, const int startNode) {
   vector<shared_ptr<const edge::CostCapEdge>> edgeList;
-  for (const auto& edge : graph.getEdges()) {
+  const auto superEdgeList = graph.getEdges();
+  for (const auto& edge : *superEdgeList) {
     edgeList.push_back(static_pointer_cast<const edge::CostCapEdge>(edge));
   }
   vector<double> shortestDistance(graph.numNodes, INFINITY);

@@ -69,8 +69,8 @@ vector<shared_ptr<const edge::CostCapEdge>> getMSTKruskal(graph::SuperGraph &gra
       CompareEdgePtrs
   > sortedEdges;
 
-  auto edges = graph.getEdges();
-  for (const auto& edge: edges) {
+  const auto edges = graph.getEdges();
+  for (const auto& edge: *edges) {
     sortedEdges.push(std::dynamic_pointer_cast<const edge::CostCapEdge>(edge));
   }
 

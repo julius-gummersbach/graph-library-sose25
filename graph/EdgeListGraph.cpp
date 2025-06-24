@@ -42,11 +42,11 @@ namespace graph {
     initialized = true;
   }
 
-  std::vector<std::shared_ptr<const edge::SuperEdge>> EdgeListGraph::getEdges() {
+  std::shared_ptr<const std::vector<std::shared_ptr<const edge::SuperEdge>>> EdgeListGraph::getEdges() {
     if (!initialized) {
       throw std::runtime_error("Graph not initialized.");
     }
-    return edgeList;
+    return std::make_shared<std::vector<std::shared_ptr<const edge::SuperEdge>>>(edgeList);
   }
 
   std::vector<std::shared_ptr<const edge::SuperEdge>> EdgeListGraph::getAdjacent(int node) {

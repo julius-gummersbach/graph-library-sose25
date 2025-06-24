@@ -21,6 +21,7 @@ add_executable(graph-library-gummersbach
         helper/AugmentingPathFinder.h
         helper/BfsAugmentingPathFinder.cpp
         helper/BfsAugmentingPathFinder.h
+        edge/CostCapEdgeHasher.h
 )
 
 target_include_directories(graph-library-gummersbach PRIVATE ${Boost_INCLUDE_DIRS})

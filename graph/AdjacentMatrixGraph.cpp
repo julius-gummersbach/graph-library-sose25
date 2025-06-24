@@ -57,6 +57,7 @@ namespace graph {
   }
 
   AdjacentMatrixGraph::AdjacentMatrixGraph(const std::vector<std::shared_ptr<const edge::SuperEdge> > &edgeList, const bool isDirected) {
+    if (!isDirected) throw std::runtime_error("Not implemented");
     directed = isDirected;
     weighted = dynamic_pointer_cast<const edge::CostCapEdge>(edgeList[0]) != nullptr;
     for (const auto &edge: edgeList) {
@@ -89,14 +90,14 @@ namespace graph {
     return adjacent;
   }
 
-  std::vector<std::shared_ptr<const edge::SuperEdge> > AdjacentMatrixGraph::getEdges() {
+  std::shared_ptr<const std::vector<std::shared_ptr<const edge::SuperEdge>>> AdjacentMatrixGraph::getEdges() {
     if (!directed) throw std::runtime_error("Not implemented");
-    std::vector<std::shared_ptr<const edge::SuperEdge> > edges;
+    std::vector<std::shared_ptr<const edge::SuperEdge>> edges;
     edges.reserve(numNodes);
     for (const auto &edge: adjacencyMatrix) {
       if (edge != nullptr) edges.push_back(edge);
     }
-    return edges;
+    return std::make_shared<std::vector<std::shared_ptr<const edge::SuperEdge>>>(edges);
   }
 
   void AdjacentMatrixGraph::addEdge(std::shared_ptr<const edge::SuperEdge> edge) {

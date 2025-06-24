@@ -81,7 +81,7 @@ namespace graph {
     return adjacencyList[node];
   }
 
-  std::vector<std::shared_ptr<const edge::SuperEdge>> AdjacentListGraph::getEdges() {
+  std::shared_ptr<const std::vector<std::shared_ptr<const edge::SuperEdge>>> AdjacentListGraph::getEdges() {
     throw runtime_error("Not implemented yet.");
     /* implemented, but not tested yet
     std::vector<std::array<int, 2>> edges;

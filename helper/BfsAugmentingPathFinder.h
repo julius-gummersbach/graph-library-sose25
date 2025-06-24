@@ -11,7 +11,7 @@ namespace helper {
   public:
     std::pair<std::vector<std::shared_ptr<const edge::CostCapEdge> >, double> getAugmentingPath(
       graph::SuperGraph &graph,
-      std::map<std::shared_ptr<const edge::CostCapEdge>, double> flow,
+      std::unordered_map<edge::CostCapEdge, double, edge::CostCapEdgeHasher> flow,
       int source,
       int sink) const override;
   };

@@ -9,6 +9,7 @@
 
 #include "../graph/SuperGraph.h"
 #include "../edge/CostCapEdge.h"
+#include "../edge/CostCapEdgeHasher.h"
 
 namespace helper {
   class AugmentingPathFinder {
@@ -23,7 +24,7 @@ namespace helper {
      */
     virtual std::pair<std::vector<std::shared_ptr<const edge::CostCapEdge> >, double> getAugmentingPath(
       graph::SuperGraph &graph,
-      std::map<std::shared_ptr<const edge::CostCapEdge>, double> flow,
+      std::unordered_map<edge::CostCapEdge, double, edge::CostCapEdgeHasher> flow,
       int source,
       int sink
     ) const = 0;
