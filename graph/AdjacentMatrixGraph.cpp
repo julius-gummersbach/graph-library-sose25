@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-#include "../edge/WeightedEdge.h"
+#include "../edge/CostCapEdge.h"
 
 namespace graph {
   AdjacentMatrixGraph::AdjacentMatrixGraph() = default;
@@ -48,7 +48,7 @@ namespace graph {
 
       if (weighted) {
         ls >> w;
-        adjacencyMatrix[index] = std::make_shared<const edge::WeightedEdge>(u, v, w);
+        adjacencyMatrix[index] = std::make_shared<const edge::CostCapEdge>(u, v, w);
       } else {
         adjacencyMatrix[index] = std::make_shared<const edge::SuperEdge>(u, v);
       }
@@ -56,9 +56,9 @@ namespace graph {
     initialized = true;
   }
 
-  AdjacentMatrixGraph::AdjacentMatrixGraph(const std::vector<std::shared_ptr<const edge::WeightedEdge> > &edgeList) {
-    directed = true;
-    weighted = true;
+  AdjacentMatrixGraph::AdjacentMatrixGraph(const std::vector<std::shared_ptr<const edge::SuperEdge> > &edgeList, const bool isDirected) {
+    directed = isDirected;
+    weighted = dynamic_pointer_cast<const edge::CostCapEdge>(edgeList[0]) != nullptr;
     for (const auto &edge: edgeList) {
       numNodes = std::max(numNodes, std::max(edge->getFrom(), edge->getTo()) + 1);
     }
@@ -67,6 +67,7 @@ namespace graph {
     for (const auto &edge: edgeList) {
       adjacencyMatrix[edge->getFrom() * numNodes + edge->getTo()] = edge;
     }
+    initialized = true;
   }
 
   std::vector<std::shared_ptr<const edge::SuperEdge> > AdjacentMatrixGraph::getAdjacent(const int node) {
@@ -100,7 +101,7 @@ namespace graph {
 
   void AdjacentMatrixGraph::addEdge(std::shared_ptr<const edge::SuperEdge> edge) {
     if (!directed) throw std::runtime_error("Not implemented yet.");
-    if (weighted && std::dynamic_pointer_cast<const edge::WeightedEdge>(edge) == nullptr) {
+    if (weighted && std::dynamic_pointer_cast<const edge::CostCapEdge>(edge) == nullptr) {
       throw std::invalid_argument("Attempted to add unweighted Edge to weighted Graph");
     }
     adjacencyMatrix[edge->getFrom() * numNodes + edge->getTo()] = edge;
@@ -117,5 +118,9 @@ namespace graph {
   std::shared_ptr<const edge::SuperEdge> AdjacentMatrixGraph::getEdge(const int u, const int v) {
     if (!directed && v < u) return adjacencyMatrix[v * numNodes + u];
     return adjacencyMatrix[u * numNodes + v];
+  }
+
+  double AdjacentMatrixGraph::getBalance(int node) {
+    throw std::runtime_error("Not implemented yet.");
   }
 }

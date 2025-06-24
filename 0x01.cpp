@@ -2,8 +2,6 @@
 
 #include "graph/SuperGraph.h"
 
-using namespace std;
-
 /**
  * @param visited array denoting which nodes were already visited
  * @return the order the nodes were visited in

@@ -3,17 +3,31 @@
 #include <iostream>
 #include <sstream>
 
-#include "../edge/WeightedEdge.h"
+#include "../edge/CostCapEdge.h"
 
 namespace graph {
   using namespace std;
 
   AdjacentListGraph::AdjacentListGraph() = default;
 
-  AdjacentListGraph::AdjacentListGraph(const vector<shared_ptr<const edge::WeightedEdge>>& mstEdgeList) {
+  AdjacentListGraph::AdjacentListGraph(const vector<shared_ptr<const edge::CostCapEdge>>& mstEdgeList) {
     numNodes = mstEdgeList.size() + 1;
     adjacencyList.resize(numNodes);
     for (const auto& edge : mstEdgeList) {
+      adjacencyList[edge->getFrom()].push_back(edge);
+      if (!directed) {
+        adjacencyList[edge->getTo()].push_back(edge);
+      }
+    }
+    initialized = true;
+  }
+
+  AdjacentListGraph::AdjacentListGraph(const vector<shared_ptr<const edge::SuperEdge>>& edgeList, const bool isDirected) {
+    adjacencyList.resize(edgeList.size());
+    weighted = dynamic_pointer_cast<const edge::CostCapEdge>(edgeList[0]) != nullptr;
+    directed = isDirected;
+    for (const auto& edge : edgeList) {
+      numNodes = max(numNodes, max(edge->getFrom(), edge->getTo()) + 1);
       adjacencyList[edge->getFrom()].push_back(edge);
       if (!directed) {
         adjacencyList[edge->getTo()].push_back(edge);
@@ -48,9 +62,9 @@ namespace graph {
       ls >> u >> v;
       if (weighted) {
         ls >> w;
-        adjacencyList[u].push_back(std::make_shared<const edge::WeightedEdge>(u,v, w));
+        adjacencyList[u].push_back(std::make_shared<const edge::CostCapEdge>(u,v, w));
         if (!directed) {
-          adjacencyList[v].push_back(std::make_shared<const edge::WeightedEdge>(v,u, w));
+          adjacencyList[v].push_back(std::make_shared<const edge::CostCapEdge>(v,u, w));
         }
       } else {
         adjacencyList[u].push_back(std::make_shared<const edge::SuperEdge>(u,v));
@@ -92,6 +106,10 @@ namespace graph {
   }
 
   void AdjacentListGraph::addEdge(std::shared_ptr<const edge::SuperEdge> edge) {
+    throw std::runtime_error("Not implemented yet.");
+  }
+
+  double AdjacentListGraph::getBalance(int node) {
     throw std::runtime_error("Not implemented yet.");
   }
 }

@@ -1,10 +1,8 @@
 #include <cfloat>
 #include <vector>
 
-#include "edge/WeightedEdge.h"
+#include "edge/CostCapEdge.h"
 #include "graph/SuperGraph.h"
-
-using namespace std;
 
 
 /**
@@ -12,11 +10,11 @@ using namespace std;
  * @param startNode
  * @return edge list of a hamilton path
  */
-vector<shared_ptr<const edge::WeightedEdge>> nearestNeighbors(graph::SuperGraph &graph, const int startNode) {
+vector<shared_ptr<const edge::CostCapEdge>> nearestNeighbors(graph::SuperGraph &graph, const int startNode) {
   if (!graph.weighted) {
     throw std::invalid_argument("Graph is not weighted");
   }
-  vector<shared_ptr<const edge::WeightedEdge>> hamilton;
+  vector<shared_ptr<const edge::CostCapEdge>> hamilton;
   hamilton.reserve(graph.numNodes);
   vector visited(graph.numNodes, false);
 
@@ -28,17 +26,17 @@ vector<shared_ptr<const edge::WeightedEdge>> nearestNeighbors(graph::SuperGraph 
     // find closest unvisited node
     for (int node = 0; node < graph.numNodes; node++) {
       if (visited[node]) continue;
-      double weight = dynamic_pointer_cast<const edge::WeightedEdge>(graph.getEdge(currentNode, node))->getWeight();
+      double weight = dynamic_pointer_cast<const edge::CostCapEdge>(graph.getEdge(currentNode, node))->getCost();
       if (weight < minDist) {
         closestNode = node;
         minDist = weight;
       }
     }
     visited[closestNode] = true;
-    hamilton.push_back(dynamic_pointer_cast<const edge::WeightedEdge>(graph.getEdge(currentNode, closestNode)));
+    hamilton.push_back(dynamic_pointer_cast<const edge::CostCapEdge>(graph.getEdge(currentNode, closestNode)));
     currentNode = closestNode;
   }
-  hamilton.push_back(dynamic_pointer_cast<const edge::WeightedEdge>(graph.getEdge(currentNode, startNode)));
+  hamilton.push_back(dynamic_pointer_cast<const edge::CostCapEdge>(graph.getEdge(currentNode, startNode)));
   return hamilton;
 }
 
@@ -46,7 +44,7 @@ vector<shared_ptr<const edge::WeightedEdge>> nearestNeighbors(graph::SuperGraph 
  * @param graph a complete graph
  * @return edge list of a hamilton path, that is at most 2 times worse than the optimal solution
  */
-vector<shared_ptr<const edge::WeightedEdge>> doubleTreeAlgorthm(graph::SuperGraph &graph) {
+vector<shared_ptr<const edge::CostCapEdge>> doubleTreeAlgorthm(graph::SuperGraph &graph) {
   if (!graph.weighted) {
     throw std::invalid_argument("Graph is not weighted");
   }
@@ -58,12 +56,12 @@ vector<shared_ptr<const edge::WeightedEdge>> doubleTreeAlgorthm(graph::SuperGrap
   vector<int> order = depthFirstSearch(mstGraph, mst[0]->getFrom(), visited);
 
   // build hamilton edge list from node order
-  vector<shared_ptr<const edge::WeightedEdge>> hamilton;
+  vector<shared_ptr<const edge::CostCapEdge>> hamilton;
   hamilton.reserve(order.size());
   for (int i = 0; i < order.size() - 1; i++) {
-    hamilton.push_back(dynamic_pointer_cast<const edge::WeightedEdge>(graph.getEdge(order[i], order[i+1])));
+    hamilton.push_back(dynamic_pointer_cast<const edge::CostCapEdge>(graph.getEdge(order[i], order[i+1])));
   }
-  hamilton.push_back(dynamic_pointer_cast<const edge::WeightedEdge>(graph.getEdge(order.back(), order.front())));
+  hamilton.push_back(dynamic_pointer_cast<const edge::CostCapEdge>(graph.getEdge(order.back(), order.front())));
   return hamilton;
 }
 
@@ -76,7 +74,7 @@ bool boundCondition(graph::SuperGraph &graph, int startNode, const vector<bool>&
  * @param branchAndBound whether to use branch and bound
  * @return an optimal hamilton path
  */
-vector<shared_ptr<const edge::WeightedEdge>> bruteForceTsp(graph::SuperGraph &graph, const bool branchAndBound) {
+vector<shared_ptr<const edge::CostCapEdge>> bruteForceTsp(graph::SuperGraph &graph, const bool branchAndBound) {
   if (!graph.weighted) {
     throw std::invalid_argument("Graph is not weighted");
   }
@@ -94,12 +92,12 @@ vector<shared_ptr<const edge::WeightedEdge>> bruteForceTsp(graph::SuperGraph &gr
   bruteForceTspRec(graph, branchAndBound, startNode, visited, current, best, currentWeight, bestWeight);
 
   // construct edge list from node list
-  vector<shared_ptr<const edge::WeightedEdge>> result;
+  vector<shared_ptr<const edge::CostCapEdge>> result;
   result.reserve(graph.numNodes);
   for (int i = 0 ; i < best.size() - 1; i++) {
-    result.push_back(dynamic_pointer_cast<const edge::WeightedEdge>(graph.getEdge(best[i], best[i + 1])));
+    result.push_back(dynamic_pointer_cast<const edge::CostCapEdge>(graph.getEdge(best[i], best[i + 1])));
   }
-  result.push_back(dynamic_pointer_cast<const edge::WeightedEdge>(graph.getEdge(best.back(), best.front())));
+  result.push_back(dynamic_pointer_cast<const edge::CostCapEdge>(graph.getEdge(best.back(), best.front())));
   return result;
 }
 
@@ -116,7 +114,7 @@ vector<shared_ptr<const edge::WeightedEdge>> bruteForceTsp(graph::SuperGraph &gr
  */
 void bruteForceTspRec(graph::SuperGraph &graph, const bool branchAndBound, const int startNode, vector<bool>& visited, vector<int>& current, vector<int>& best, const double currentWeight, double& bestWeight) {
   if (current.size() == graph.numNodes) {
-    double weightBackToStartNode = dynamic_pointer_cast<const edge::WeightedEdge>(graph.getEdge(current.back(), startNode))->getWeight();
+    double weightBackToStartNode = dynamic_pointer_cast<const edge::CostCapEdge>(graph.getEdge(current.back(), startNode))->getCost();
     if (currentWeight + weightBackToStartNode < bestWeight) {
       best = current;
       bestWeight = currentWeight + weightBackToStartNode;
@@ -129,7 +127,7 @@ void bruteForceTspRec(graph::SuperGraph &graph, const bool branchAndBound, const
   for (int i = 0 ; i < graph.numNodes; i++) {
     if (visited[i]) continue;
     visited[i] = true;
-    const double newWeight = dynamic_pointer_cast<const edge::WeightedEdge>(graph.getEdge(current.back(), i))->getWeight();
+    const double newWeight = dynamic_pointer_cast<const edge::CostCapEdge>(graph.getEdge(current.back(), i))->getCost();
     current.push_back(i);
     bruteForceTspRec(graph, branchAndBound, startNode, visited, current, best, currentWeight + newWeight, bestWeight);
     visited[i] = false;
@@ -159,7 +157,7 @@ bool boundCondition(graph::SuperGraph &graph, const int startNode, const vector<
     double secondCheapestWeight  = INFINITY;
     for (int v = 0; v < graph.numNodes; v++) {
       if ((visited[v] && u != startNode) || u == v) continue;
-      const double weight = dynamic_pointer_cast<const edge::WeightedEdge>(graph.getEdge(u, v))->getWeight();
+      const double weight = dynamic_pointer_cast<const edge::CostCapEdge>(graph.getEdge(u, v))->getCost();
       if (weight < cheapestWeight) {
         secondCheapestWeight = cheapestWeight;
         cheapestWeight = weight;

@@ -9,9 +9,9 @@
 namespace helper {
   class BfsAugmentingPathFinder : public AugmentingPathFinder {
   public:
-    std::pair<std::vector<std::shared_ptr<const edge::WeightedEdge> >, double> getAugmentingPath(
+    std::pair<std::vector<std::shared_ptr<const edge::CostCapEdge> >, double> getAugmentingPath(
       graph::SuperGraph &graph,
-      std::map<std::shared_ptr<const edge::WeightedEdge>, double> flow,
+      std::map<std::shared_ptr<const edge::CostCapEdge>, double> flow,
       int source,
       int sink) const override;
   };

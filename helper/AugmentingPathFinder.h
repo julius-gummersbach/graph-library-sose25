@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "../graph/SuperGraph.h"
-#include "../edge/WeightedEdge.h"
+#include "../edge/CostCapEdge.h"
 
 namespace helper {
   class AugmentingPathFinder {
@@ -21,9 +21,9 @@ namespace helper {
      * @return Pair of an augmenting path and its bottleneck value.
      *         If there is no path, return an empty path and a bottleneck of 0
      */
-    virtual std::pair<std::vector<std::shared_ptr<const edge::WeightedEdge> >, double> getAugmentingPath(
+    virtual std::pair<std::vector<std::shared_ptr<const edge::CostCapEdge> >, double> getAugmentingPath(
       graph::SuperGraph &graph,
-      std::map<std::shared_ptr<const edge::WeightedEdge>, double> flow,
+      std::map<std::shared_ptr<const edge::CostCapEdge>, double> flow,
       int source,
       int sink
     ) const = 0;

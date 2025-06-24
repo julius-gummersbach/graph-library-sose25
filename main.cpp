@@ -10,13 +10,14 @@
 #include "graph/AdjacentMatrixGraph.h"
 #include "graph/AdjacentListGraph.h"
 
+using namespace std;
+
 #include "0x01.cpp"
 #include "0x02.cpp"
 #include "0x03.cpp"
 #include "0x04.cpp"
 #include "0x05.cpp"
-
-using namespace std;
+#include "0x06.cpp"
 
 const string INPUT_DIR = "../input/";
 
@@ -32,9 +33,11 @@ double evaluateDijkstra0to1(graph::SuperGraph &graph);
 double evaluateMooreBellmanFord2to0(graph::SuperGraph &graph);
 double evaluateMooreBellmanFord0to1(graph::SuperGraph &graph);
 double evaluateEdmondsKarp0to7(graph::SuperGraph &graph);
+double evaluateCycleCancelling(graph::SuperGraph &graph);
 
 
 int main() {
+  /*
   // 0x01, connected components
   cout << "############################################" << endl;
   cout << "############################################" << endl;
@@ -152,7 +155,26 @@ int main() {
   assertFunctionOnGraph(INPUT_DIR + "0x05/Fluss.txt", new graph::AdjacentMatrixGraph(), evaluateEdmondsKarp0to7, 4, true);
   assertFunctionOnGraph(INPUT_DIR + "0x05/Fluss2.txt", new graph::AdjacentMatrixGraph(), evaluateEdmondsKarp0to7, 5, true);
   assertFunctionOnGraph(INPUT_DIR + "0x02/G_1_2.txt", new graph::AdjacentMatrixGraph(), evaluateEdmondsKarp0to7, 0.75447, true);
-
+*/
+  assertFunctionOnGraph(INPUT_DIR + "0x06/Kostenminimal1.txt", new graph::EdgeListGraph(), evaluateCycleCancelling, 3, true);
+  assertFunctionOnGraph(INPUT_DIR + "0x06/Kostenminimal2.txt", new graph::EdgeListGraph(), evaluateCycleCancelling, 0, true);
+  try {
+    assertFunctionOnGraph(INPUT_DIR + "0x06/Kostenminimal3.txt", new graph::EdgeListGraph(), evaluateCycleCancelling, 3, true);
+  } catch (const std::invalid_argument& e) {
+    cout << "No b-flow possible detected successfully: " << e.what() << endl << endl << endl;
+  }
+  try {
+    assertFunctionOnGraph(INPUT_DIR + "0x06/Kostenminimal4.txt", new graph::EdgeListGraph(), evaluateCycleCancelling, 3, true);
+  } catch (const std::invalid_argument& e) {
+    cout << "No b-flow possible detected successfully: " << e.what() << endl << endl << endl;
+  }
+  assertFunctionOnGraph(INPUT_DIR + "0x06/Kostenminimal_gross1.txt", new graph::EdgeListGraph(), evaluateCycleCancelling, 1537, true);
+  assertFunctionOnGraph(INPUT_DIR + "0x06/Kostenminimal_gross2.txt", new graph::EdgeListGraph(), evaluateCycleCancelling, 1838, true);
+  try {
+    assertFunctionOnGraph(INPUT_DIR + "0x06/Kostenminimal_gross3.txt", new graph::EdgeListGraph(), evaluateCycleCancelling, 3, true);
+  } catch (const std::invalid_argument& e) {
+    cout << "No b-flow possible detected successfully: " << e.what() << endl << endl << endl;
+  }
   return 0;
 }
 
@@ -192,7 +214,7 @@ void assertFunctionOnGraph(const string& inputFile, graph::SuperGraph* graph, do
   cout << "Total time: " << (setupDuration + calcDuration).count() << " ms" << endl;
   cout << "Result: " << result << " expected: " << expectedResult << endl;
 
-  assert(("Test failed: Result does not match expected value", abs(result - expectedResult) < 0.000001));
+  assert(("Test failed: Result does not match expected value", abs(result - expectedResult) < DBL_EPSILON));
   cout << "============================" << endl << endl;
 
   delete graph;
@@ -205,7 +227,7 @@ double evaluatePrim(graph::SuperGraph &graph) {
   const auto mst = getMSTPrim(graph);
   double weight = 0;
   for (const auto& edge: mst) {
-    weight += edge->getWeight();
+    weight += edge->getCost();
   }
   return weight;
 }
@@ -217,18 +239,18 @@ double evaluateKruskal(graph::SuperGraph &graph) {
   const auto mst = getMSTKruskal(graph);
   double weight = 0;
   for (const auto edge: mst) {
-    weight += edge->getWeight();
+    weight += edge->getCost();
   }
   return weight;
 }
 
 /**
- * checks, if the given edge list is a hamilton-circle and prints it and its weight to std::cout
+ * checks, if the given edge list is a hamilton-circle and prints it and its cost to std::cout
  * @param circle an edge list
  * @param directed whether the check should assume a directed graph
  * @return 1 if circle is a hamilton circle, 0 otherwise
  */
-double printAndCheckHamilton(const vector<shared_ptr<const edge::WeightedEdge>> &circle, const bool directed) {
+double printAndCheckHamilton(const vector<shared_ptr<const edge::CostCapEdge>> &circle, const bool directed) {
   const int startNode = circle[0]->getFrom();
   double weight = 0;
   int current = startNode;
@@ -241,7 +263,7 @@ double printAndCheckHamilton(const vector<shared_ptr<const edge::WeightedEdge>> 
       swap(from, to);
     }
     cout << from << "-";
-    weight += edge->getWeight();
+    weight += edge->getCost();
     current = to;
   }
   if (circle.at(circle.size()-1)->getTo() != startNode && (directed || circle.at(circle.size()-1)->getFrom() != startNode)) return 0;
@@ -287,14 +309,14 @@ double evaluateTspBnB(graph::SuperGraph &graph) {
   return printAndCheckHamilton(shortestHamilton, graph.directed);
 }
 
-double checkAndPrintPath(const vector<shared_ptr<const edge::WeightedEdge>> &path) {
+double checkAndPrintPath(const vector<shared_ptr<const edge::CostCapEdge>> &path) {
   int currentNode = path[0]->getFrom();
   double weight = 0;
   cout << currentNode;
   for (const auto& edge: path) {
     if (edge->getFrom() != currentNode) return false;
     currentNode = edge->getTo();
-    weight += edge->getWeight();
+    weight += edge->getCost();
     cout << "-" << currentNode;
   }
   cout << ". Weight: " << weight << endl;
@@ -339,6 +361,9 @@ double evaluateMooreBellmanFord(graph::SuperGraph &graph, const int from, const 
   auto reached = vector(graph.numNodes, false);
   reached[from] = true;
   auto shortestPaths = mooreBellmanFord(graph, from);
+  if (shortestPaths.contains(-1)) {
+    throw std::invalid_argument("Negative Cycle in graph detected");
+  }
   for (auto& p : shortestPaths) {
     if (p.first == from) continue;
     reached[p.first] = true;
@@ -374,5 +399,9 @@ double evaluateMooreBellmanFord0to1(graph::SuperGraph &graph) {
 }
 
 double evaluateEdmondsKarp0to7(graph::SuperGraph &graph) {
-  return edmondsKarp(graph, 0, 7);
+  return get<0>(edmondsKarp(graph, 0, 7));
+}
+
+double evaluateCycleCancelling(graph::SuperGraph &graph) {
+  return get<1>(cycleCancelling(graph));
 }

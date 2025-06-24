@@ -14,6 +14,7 @@ namespace graph {
     int numNodes = 0;
     bool directed = false;
     bool weighted = false;
+    bool hasBalance = false;
     bool initialized = false;
 
     virtual void initializeFromInput(std::istream& input) = 0;
@@ -26,9 +27,11 @@ namespace graph {
      * Adds the given edge to the graph.
      * If an edge between the two nodes already exists, it is overwritten.
      * NumNodes is updated if needed.
-     * If the graph is weighted, edge must be an instance of WeightedEdge.
+     * If the graph is weighted, edge must be an instance of CostCapEdge.
      */
     virtual void addEdge(std::shared_ptr<const edge::SuperEdge> edge) = 0;
+
+    virtual double getBalance(int node) = 0;
   };
 }
 
